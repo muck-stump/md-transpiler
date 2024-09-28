@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/footnotes.html b/examples/output/footnotes.html
-index 2a5009f8..dfaca94c 100644
+index 2a5009f..dfaca94 100644
 --- a/examples/expected_output/footnotes.html
 +++ b/examples/output/footnotes.html
 @@ -1,15 +1 @@

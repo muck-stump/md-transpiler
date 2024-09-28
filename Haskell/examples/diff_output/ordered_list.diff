@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/ordered_list.html b/examples/output/ordered_list.html
-index 54025dcf..dfaca94c 100644
+index 54025dc..dfaca94 100644
 --- a/examples/expected_output/ordered_list.html
 +++ b/examples/output/ordered_list.html
 @@ -1,23 +1 @@

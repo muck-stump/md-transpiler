@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/code.html b/examples/output/code.html
-index 57fbd649..dfaca94c 100644
+index 57fbd64..dfaca94 100644
 --- a/examples/expected_output/code.html
 +++ b/examples/output/code.html
 @@ -1,17 +1 @@

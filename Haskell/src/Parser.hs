@@ -3,15 +3,23 @@
 -- | Implementation of a parser-combinator.
 module Parser where
 
-import           Control.Applicative
-import           Data.Char           (isAlpha, isDigit, isLower, isSpace,
-                                      isUpper)
-import           Instances           (ParseError (..), ParseResult (..),
-                                      Parser (..), readInt)
+import Control.Applicative
+import Data.Char
+  ( isAlpha,
+    isDigit,
+    isLower,
+    isSpace,
+    isUpper,
+  )
+import Instances
+  ( ParseError (..),
+    ParseResult (..),
+    Parser (..),
+    readInt,
+  )
 
 -- $setup
 -- >>> import Instances (isErrorResult, parse)
-
 
 -- | -------------------------------------------------
 -- | --------------- Core parsers --------------------
@@ -40,7 +48,7 @@ unexpectedCharParser = Parser . const . Error . UnexpectedChar
 char :: Parser Char
 char = Parser f
   where
-    f ""       = Error UnexpectedEof
+    f "" = Error UnexpectedEof
     f (x : xs) = Result xs x
 
 -- | Parse numbers as int until non-digit
@@ -60,7 +68,7 @@ int = Parser f
     f "" = Error UnexpectedEof
     f x = case readInt x of
       Just (v, rest) -> Result rest v
-      Nothing        -> Error $ UnexpectedChar (head x)
+      Nothing -> Error $ UnexpectedChar (head x)
 
 -- | Write a parser that asserts that there is no remaining input.
 --
@@ -73,7 +81,7 @@ eof :: Parser ()
 eof = Parser f
   where
     f "" = Result "" ()
-    f x  = Error $ ExpectedEof x
+    f x = Error $ ExpectedEof x
 
 -- | -------------------------------------------------
 -- | --------------- Satisfy parsers -----------------
@@ -235,7 +243,6 @@ spaces = many space
 -- True
 spaces1 :: Parser String
 spaces1 = some space
-
 
 -- | Write a parser that will parse zero or more spaces (not including newlines)
 --

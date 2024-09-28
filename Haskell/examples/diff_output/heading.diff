@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/heading.html b/examples/output/heading.html
-index a2d6b22c..dfaca94c 100644
+index a2d6b22..dfaca94 100644
 --- a/examples/expected_output/heading.html
 +++ b/examples/output/heading.html
 @@ -1,21 +1 @@

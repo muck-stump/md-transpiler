@@ -1,13 +1,20 @@
 module Assignment (markdownParser, convertADTHTML) where
 
-
-import           Data.Time.Clock  (getCurrentTime)
-import           Data.Time.Format (defaultTimeLocale, formatTime)
-import           Instances        (Parser (..))
-import           Parser           ()
+import Data.Time.Clock (getCurrentTime)
+import Data.Time.Format (defaultTimeLocale, formatTime)
+import Instances (Parser (..))
+import Parser ()
 
 data ADT = Empty
   -- Your ADT **must** derive Show.
+  deriving (Show, Eq)
+
+data FreeText
+  = Bold String
+  | Italic String
+  | StrikeThrough String
+  | InlineCode String
+  | Untouched String
   deriving (Show, Eq)
 
 markdownParser :: Parser ADT
