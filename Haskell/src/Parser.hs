@@ -328,9 +328,12 @@ stringTok :: String -> Parser String
 stringTok = tok . string
 
 -- Parse a until the first time parse b succeeds
-parseUntil :: Parser a -> Parser b -> Parser [a]
-parseUntil a b = ([] <$ b) <|> liftA2 (:) a (parseUntil a b)
+-- does not save the parsing of b
+pUntil :: Parser a -> Parser b -> Parser [a]
+pUntil a b = ([] <$ b) <|> liftA2 (:) a (pUntil a b)
 
 -- parse b, then parse a until first parse b succeeds
-parseBetween :: Parser a -> Parser b -> Parser [a]
-parseBetween a b = b *> parseUntil a b
+-- >>> parse (char `pBetween` string "**") "**abc**"
+-- Result >< "abc"
+pBetween :: Parser a -> Parser b -> Parser [a]
+pBetween a b = b *> pUntil a b
