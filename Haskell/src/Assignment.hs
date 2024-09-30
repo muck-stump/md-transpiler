@@ -55,7 +55,7 @@ pStrikeThrough :: Parser ModText
 pStrikeThrough = makeModParser StrikeThrough pModText (string "~~")
 
 pInlineCode :: Parser ModText
-pInlineCode = makeModParser StrikeThrough pUntouched (string "`")
+pInlineCode = makeModParser InlineCode (isNot '\n') (string "`")
 
 pLink :: Parser ModText
 pLink = Link <$> linkTuple
