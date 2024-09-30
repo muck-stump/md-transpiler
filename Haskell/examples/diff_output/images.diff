@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/images.html b/examples/output/images.html
-index 1e9c518..dfaca94 100644
+index 1e9c518..3a69ed4 100644
 --- a/examples/expected_output/images.html
 +++ b/examples/output/images.html
 @@ -1,13 +1 @@
@@ -16,5 +16,5 @@ index 1e9c518..dfaca94 100644
 -</body>
 -
 -</html>
-+IMPLEMENT_THIS
++el halblo
 \ No newline at end of file

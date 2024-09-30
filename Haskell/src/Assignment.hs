@@ -24,4 +24,4 @@ getTime :: IO String
 getTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S" <$> getCurrentTime
 
 convertADTHTML :: ADT -> String
-convertADTHTML Empty = "IMPLEMENT_THIS"
+convertADTHTML Empty = "el halblo"
