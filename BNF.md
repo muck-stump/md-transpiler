@@ -1,3 +1,6 @@
+approach  -> parser will try to succeed whenever an alternative interpretation is possible. 
+generally, this means things that throw errors will be interpreted as free text. 
+
 _italic text_
 **bold text**
 ~~strikethrough~~

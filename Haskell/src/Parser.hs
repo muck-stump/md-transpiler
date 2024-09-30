@@ -329,6 +329,7 @@ stringTok = tok . string
 
 -- Parse a until the first time parse b succeeds
 -- does not save the parsing of b
+-- can parse a 0 times
 pUntil :: Parser a -> Parser b -> Parser [a]
 pUntil a b = ([] <$ b) <|> liftA2 (:) a (pUntil a b)
 
