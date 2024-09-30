@@ -41,6 +41,10 @@ data CaptionText = CaptionText String
 data FootnoteReference = FootnoteReference (ModText, String)
   deriving (Show, Eq)
 
+-- stuff?
+pBasic :: Parser Char
+pBasic = isNot '\n'
+
 -- PARSE FREETEXT
 makeModParser :: ([a] -> ModText) -> Parser a -> Parser b -> Parser ModText
 makeModParser f p1 p2 = f <$> p1 `pBetween` p2
@@ -55,20 +59,20 @@ pStrikeThrough :: Parser ModText
 pStrikeThrough = makeModParser StrikeThrough pModText (string "~~")
 
 pInlineCode :: Parser ModText
-pInlineCode = makeModParser InlineCode (isNot '\n') (string "`")
+pInlineCode = makeModParser InlineCode pBasic (string "`")
 
 pLink :: Parser ModText
 pLink = Link <$> linkTuple
   where
     linkTuple = liftA2 (,) linkText linkURL
-    linkText = is '[' *> isNot '\n' `pUntil` is ']'
-    linkURL = is '(' *> isNot '\n' `pUntil` is ')'
+    linkText = is '[' *> pBasic `pUntil` is ']'
+    linkURL = is '(' *> pBasic `pUntil` is ')'
 
 pFootnote :: Parser ModText
 pFootnote = Footnote <$> (string "[^" *> digit `pUntil` is ']')
 
 pUntouched :: Parser ModText
-pUntouched = Untouched <$> isNot '\n'
+pUntouched = Untouched <$> pBasic
 
 pModText :: Parser ModText
 pModText = pBold <|> pItalic <|> pStrikeThrough <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
@@ -83,17 +87,17 @@ pImage = Image <$> pAltText <*> pImgURL <*> pCaptionText
 pAltText :: Parser AltText
 pAltText = AltText <$> altTextContent
   where
-    altTextContent = string "![" *> isNot '\n' `pUntil` is ']'
+    altTextContent = string "![" *> pBasic `pUntil` is ']'
 
 pImgURL :: Parser ImgURL
 pImgURL = ImgURL <$> imgURLContent
   where
-    imgURLContent = is '(' *> isNot '\n' `pUntil` is ' ' <* spaces1
+    imgURLContent = is '(' *> pBasic `pUntil` is ' ' <* spaces1
 
 pCaptionText :: Parser CaptionText
 pCaptionText = CaptionText <$> captionTextContent
   where
-    captionTextContent = isNot '\n' `pBetween` is '\"'
+    captionTextContent = pBasic `pBetween` is '\"'
 
 --- FOOTNOTE REFERENCES
 pFootnoteReference :: Parser FootnoteReference
@@ -101,11 +105,12 @@ pFootnoteReference = FootnoteReference <$> refContent
   where
     refContent = liftA2 (,) theReference theContent
     theReference = pFootnote <* is ':'
-    theContent = spaces *> many (isNot '\n')
+    theContent = spaces *> many pBasic
 
 -- HEADINGS
 
 -- LINES
+
 -- MARKDOWN
 markdownParser :: Parser Md
 markdownParser = Md . (: []) <$> pFreeText
