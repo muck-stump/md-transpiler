@@ -21,13 +21,13 @@ data ModText
   deriving (Show, Eq)
 
 -- pMod :: String -> Parser ModText
--- pMod Mod = Mod <$> char `pBetween` string Inp
+-- pMod Mod Inp = Mod <$> char `pBetween` string Inp
 
 pBold :: Parser ModText
 pBold = Bold <$> char `pBetween` string "**"
 
 -- pItalic :: Parser ModText
--- pItalic = pMod "_"
+-- pItalic = Italic <$>
 
 pFreeText :: Parser FreeText
 pFreeText = FreeText . (: []) <$> pBold
