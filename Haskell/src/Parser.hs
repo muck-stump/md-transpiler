@@ -338,3 +338,9 @@ pUntil a b = ([] <$ b) <|> liftA2 (:) a (pUntil a b)
 -- Result >< "abc"
 pBetween :: Parser a -> Parser b -> Parser [a]
 pBetween a b = b *> pUntil a b
+
+----
+-- utilised parser
+----
+
+-- pBold :: Parser Bold

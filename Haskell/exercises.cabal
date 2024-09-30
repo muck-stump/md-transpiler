@@ -24,6 +24,7 @@ library
       Assignment
       Instances
       Parser
+      Types
   other-modules:
       Paths_exercises
   hs-source-dirs:
