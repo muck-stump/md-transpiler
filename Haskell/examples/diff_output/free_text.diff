@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/free_text.html b/examples/output/free_text.html
-index d178a3b..c22e2b9 100644
+index d178a3b..561a622 100644
 --- a/examples/expected_output/free_text.html
 +++ b/examples/output/free_text.html
-@@ -1,15 +1,4 @@
+@@ -1,15 +1,5 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -15,7 +15,7 @@ index d178a3b..c22e2b9 100644
 +this is before Md
      <p>Here is some <strong>markdown</strong></p>
      <p>More lines here</p>
--    <p>Text</p>
+     <p>Text</p>
 -</body>
 -
 -</html>

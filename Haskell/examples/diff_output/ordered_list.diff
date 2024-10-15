@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/ordered_list.html b/examples/output/ordered_list.html
-index 54025dc..34a3fb4 100644
+index 54025dc..9e93cfb 100644
 --- a/examples/expected_output/ordered_list.html
 +++ b/examples/output/ordered_list.html
-@@ -1,23 +1,4 @@
+@@ -1,23 +1,9 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -29,5 +29,10 @@ index 54025dc..34a3fb4 100644
 +this is before Md
 +    <p>1. Item 1</p>
 +    <p>    1. Sub Item 1</p>
++    <p>    2. Sub Item 2</p>
++    <p>    3. Sub Item 3</p>
++    <p>2. <strong>Bolded Item 2</strong></p>
++    <p>6. Item 3</p>
++    <p>7. Item 4</p>
 +this is after Md
 \ No newline at end of file

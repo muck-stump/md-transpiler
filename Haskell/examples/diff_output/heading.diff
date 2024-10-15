@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/heading.html b/examples/output/heading.html
-index a2d6b22..df2c9b2 100644
+index a2d6b22..b55b25c 100644
 --- a/examples/expected_output/heading.html
 +++ b/examples/output/heading.html
-@@ -1,21 +1,4 @@
+@@ -1,21 +1,15 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -27,5 +27,16 @@ index a2d6b22..df2c9b2 100644
 +this is before Md
 +    <p># Heading 1</p>
 +    <p>## Heading 2</p>
++    <p>### Heading 3</p>
++    <p>#### Heading 4</p>
++    <p>##### Heading 5</p>
++    <p>###### Heading 6</p>
++    <p></p>
++    <p>Alternative Heading 1</p>
++    <p>======</p>
++    <p>Heading level 2</p>
++    <p>---------------</p>
++    <p></p>
++    <p># <strong>Bolded Heading 1</strong></p>
 +this is after Md
 \ No newline at end of file

@@ -9,7 +9,7 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, digit, is, isNot, oneof, pBetween, pUntil, spaces, spaces1, string)
+import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, spaces, spaces1, string)
 
 data Md = Md [FreeText]
   -- Your ADT **must** derive Show.
@@ -25,7 +25,7 @@ data ModText
   | InlineCode String
   | Untouched Char
   | Link (String, String)
-  | Footnote String -- bad, enforce int-ness
+  | Footnote Int -- bad, enforce int-ness
   deriving (Show, Eq)
 
 data Image = Image AltText ImgURL CaptionText
@@ -71,7 +71,7 @@ pLink = Link <$> linkTuple
     linkURL = is '(' *> pBasic `pUntil` is ')'
 
 pFootnote :: Parser ModText
-pFootnote = Footnote <$> (string "[^" *> digit `pUntil` is ']')
+pFootnote = Footnote <$> (string "[^" *> int <* is ']')
 
 pUntouched :: Parser ModText
 pUntouched = Untouched <$> pBasic
@@ -115,7 +115,9 @@ pFootnoteReference = FootnoteReference <$> refContent
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> ((:) <$> pFreeText <* is '\n' <*> ((: []) <$> pFreeText))
+markdownParser = Md <$> (pFreeText <* is '\n') `pUntil` eof
+
+-- markdownParser = Md <$> ((:) <$> pFreeText <* is '\n' <*> ((: []) <$> pFreeText))
 
 -- printing classing and typing
 class PrettyBoy p where
