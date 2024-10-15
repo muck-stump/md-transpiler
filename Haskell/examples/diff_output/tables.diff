@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/tables.html b/examples/output/tables.html
-index 70fde47..8bc3fe4 100644
+index 70fde47..c7cdd6d 100644
 --- a/examples/expected_output/tables.html
 +++ b/examples/output/tables.html
-@@ -6,33 +6,11 @@
+@@ -6,33 +6,12 @@
      <title>Test</title>
  </head>
  
@@ -42,5 +42,6 @@ index 70fde47..8bc3fe4 100644
 +    <p>| here          | is            | data  |</p>
 +    <p>| here          | is            | data  |</p>
 +    <p>| here | is also | <strong>bolded data</strong> |</p>
++    <p></p>
 +</body></html>
 \ No newline at end of file

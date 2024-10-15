@@ -339,6 +339,16 @@ pUntil a b = ([] <$ b) <|> liftA2 (:) a (pUntil a b)
 pBetween :: Parser a -> Parser b -> Parser [a]
 pBetween a b = b *> pUntil a b
 
+sepBy1 :: Parser a -> Parser b -> Parser [a]
+sepBy1 p sep = p <:> many (sep *> p)
+  where
+    -- (Optional) Join two parsers into a list
+    (<:>) :: Parser a -> Parser [a] -> Parser [a]
+    (<:>) = liftA2 (:)
+
+sepBy :: Parser a -> Parser b -> Parser [a]
+sepBy p sep = sepBy1 p sep <|> pure []
+
 ----
 -- utilised parser
 ----

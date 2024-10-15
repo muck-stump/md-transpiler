@@ -9,7 +9,7 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, spaces, spaces1, string)
+import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, spaces, spaces1, string)
 
 data Md = Md [FreeText]
   -- Your ADT **must** derive Show.
@@ -18,6 +18,7 @@ data Md = Md [FreeText]
 data FreeText = FreeText [ModText]
   deriving (Show, Eq)
 
+-- ask how to make this seperate types
 data ModText
   = Bold [ModText]
   | Italic [ModText]
@@ -115,7 +116,7 @@ pFootnoteReference = FootnoteReference <$> refContent
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (pFreeText <* is '\n') `pUntil` eof
+markdownParser = Md <$> (pFreeText `sepBy` is '\n') <* eof
 
 -- printing classing and typing
 class PrettyBoy p where
@@ -172,8 +173,8 @@ instance PrettyBoy ModText where
   preText _ (StrikeThrough _) = "<del>"
   preText _ (InlineCode _) = "<code>"
   preText _ (Untouched _) = ""
-  preText _ (Link _) = "<strong>"
-  preText _ (Footnote _) = "<strong>"
+  preText _ (Link _) = "<a href=\""
+  preText _ (Footnote _) = "<sup>"
 
   postText :: String -> ModText -> String
   postText _ (Bold _) = "</strong>"
@@ -181,8 +182,8 @@ instance PrettyBoy ModText where
   postText _ (StrikeThrough _) = "</del>"
   postText _ (InlineCode _) = "</code>"
   postText _ (Untouched _) = ""
-  postText _ (Link _) = "</strong>"
-  postText _ (Footnote _) = "</strong>"
+  postText _ (Link _) = "</a>"
+  postText _ (Footnote _) = "</sup>"
 
   unwrapPrint :: String -> ModText -> String
   unwrapPrint _ (Bold a) = prettyPrintAux "" a
@@ -190,8 +191,10 @@ instance PrettyBoy ModText where
   unwrapPrint _ (StrikeThrough a) = prettyPrintAux "" a
   unwrapPrint _ (InlineCode a) = a
   unwrapPrint _ (Untouched a) = [a]
-  unwrapPrint _ (Link a) = show a
-  unwrapPrint _ (Footnote a) = show a
+  unwrapPrint _ (Link a) = snd a ++ "\">" ++ fst a
+  unwrapPrint _ (Footnote a) = "<a id=\"fn" ++ n ++ "ref\" href=\"#fn" ++ n ++ "\">" ++ n ++ "</a>"
+    where
+      n = show a
 
 getTime :: IO String
 getTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S" <$> getCurrentTime

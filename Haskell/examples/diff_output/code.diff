@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/code.html b/examples/output/code.html
-index 57fbd64..fa6f24f 100644
+index 57fbd64..bf455b3 100644
 --- a/examples/expected_output/code.html
 +++ b/examples/output/code.html
-@@ -6,12 +6,13 @@
+@@ -6,12 +6,14 @@
      <title>Test</title>
  </head>
  
@@ -23,5 +23,6 @@ index 57fbd64..fa6f24f 100644
 +    <p>putStrLn "Never gonna let you down"</p>
 +    <p>putStrLn "Never gonna run around and desert you"</p>
 +    <p><code></code>`</p>
++    <p></p>
 +</body></html>
 \ No newline at end of file

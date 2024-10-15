@@ -83,7 +83,7 @@ replaceFolderAtIndex filePath index newFolder = joinPath (replaceAtIndex index n
 
 checkADTShow :: IO ()
 checkADTShow = do
-  let markdownStr = "[^1] test **bold** "
+  let markdownStr = "test **bold**\n"
   putStrLn "Testing ADT's Show instance:"
   putStrLn $ "Input string: " ++ markdownStr
   putStrLn $ case parse markdownParser markdownStr of
