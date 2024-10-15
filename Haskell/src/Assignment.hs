@@ -25,7 +25,7 @@ data ModText
   | InlineCode String
   | Untouched Char
   | Link (String, String)
-  | Footnote Int -- bad, enforce int-ness
+  | Footnote Int
   deriving (Show, Eq)
 
 data Image = Image AltText ImgURL CaptionText
@@ -117,18 +117,20 @@ pFootnoteReference = FootnoteReference <$> refContent
 markdownParser :: Parser Md
 markdownParser = Md <$> (pFreeText <* is '\n') `pUntil` eof
 
--- markdownParser = Md <$> ((:) <$> pFreeText <* is '\n' <*> ((: []) <$> pFreeText))
-
 -- printing classing and typing
 class PrettyBoy p where
-  preText :: p -> String
-  preText _ = ""
+  preText :: String -> p -> String
+  preText _ _ = ""
 
-  postText :: p -> String
-  postText _ = ""
+  postText :: String -> p -> String
+  postText _ _ = ""
 
   prettyPrint :: String -> p -> String
-  prettyPrint d p = preText p ++ unwrapPrint d p ++ postText p
+  prettyPrint = combine3 preText unwrapPrint postText
+    where
+      combine3 = dliftA3 concat3 -- double liftA3, and combine by sticking the three stings together
+      dliftA3 = liftA3 . liftA3 -- double liftA3. use to thread 2 arguments through 3 functions, then combine
+      concat3 = ((++) .) . (++) -- take three strings and stick them together
 
   unwrapPrint :: String -> p -> String
 
@@ -138,11 +140,11 @@ class PrettyBoy p where
       accumulate acc text = acc ++ delim ++ prettyPrint delim text
 
 instance PrettyBoy Md where
-  preText :: Md -> String
-  preText _ = "this is before Md"
+  preText :: String -> Md -> String
+  preText _ _ = "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Test</title>\n</head>\n\n\n<body>"
 
-  postText :: Md -> String
-  postText _ = "this is after Md"
+  postText :: String -> Md -> String
+  postText _ _ = "</body></html>"
 
   unwrapPrint :: String -> Md -> String
   unwrapPrint d (Md a) = prettyPrintAux sep a ++ d
@@ -150,11 +152,11 @@ instance PrettyBoy Md where
       sep = d ++ "    "
 
 instance PrettyBoy FreeText where
-  preText :: FreeText -> String
-  preText _ = "<p>"
+  preText :: String -> FreeText -> String
+  preText _ _ = "<p>"
 
-  postText :: FreeText -> String
-  postText _ = "</p>"
+  postText :: String -> FreeText -> String
+  postText _ _ = "</p>"
 
   unwrapPrint :: String -> FreeText -> String
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
@@ -164,23 +166,23 @@ instance PrettyBoy FreeText where
 --     sep = d ++ "    "
 
 instance PrettyBoy ModText where
-  preText :: ModText -> String
-  preText (Bold _) = "<strong>"
-  preText (Italic _) = "<em>"
-  preText (StrikeThrough _) = "<del>"
-  preText (InlineCode _) = "<code>"
-  preText (Untouched _) = ""
-  preText (Link _) = "<strong>"
-  preText (Footnote _) = "<strong>"
+  preText :: String -> ModText -> String
+  preText _ (Bold _) = "<strong>"
+  preText _ (Italic _) = "<em>"
+  preText _ (StrikeThrough _) = "<del>"
+  preText _ (InlineCode _) = "<code>"
+  preText _ (Untouched _) = ""
+  preText _ (Link _) = "<strong>"
+  preText _ (Footnote _) = "<strong>"
 
-  postText :: ModText -> String
-  postText (Bold _) = "</strong>"
-  postText (Italic _) = "</em>"
-  postText (StrikeThrough _) = "</del>"
-  postText (InlineCode _) = "</code>"
-  postText (Untouched _) = ""
-  postText (Link _) = "</strong>"
-  postText (Footnote _) = "</strong>"
+  postText :: String -> ModText -> String
+  postText _ (Bold _) = "</strong>"
+  postText _ (Italic _) = "</em>"
+  postText _ (StrikeThrough _) = "</del>"
+  postText _ (InlineCode _) = "</code>"
+  postText _ (Untouched _) = ""
+  postText _ (Link _) = "</strong>"
+  postText _ (Footnote _) = "</strong>"
 
   unwrapPrint :: String -> ModText -> String
   unwrapPrint _ (Bold a) = prettyPrintAux "" a
