@@ -3,9 +3,11 @@ module Assignment (markdownParser, convertADTHTML) where
 import Control.Applicative
   ( Alternative (many, some, (<|>)),
     Applicative (liftA2),
+    liftA3,
   )
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
+import GHC.TypeLits (Mod)
 import Instances (Parser (..))
 import Parser (char, digit, is, isNot, oneof, pBetween, pUntil, spaces, spaces1, string)
 
@@ -113,10 +115,87 @@ pFootnoteReference = FootnoteReference <$> refContent
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md . (: []) <$> pFreeText
+markdownParser = Md <$> ((:) <$> pFreeText <* is '\n' <*> ((: []) <$> pFreeText))
+
+-- printing classing and typing
+class PrettyBoy p where
+  preText :: p -> String
+  preText _ = ""
+
+  postText :: p -> String
+  postText _ = ""
+
+  baseDepth :: p -> String
+  baseDepth _ = "    "
+
+  prettyPrint :: String -> p -> String
+  prettyPrint d p = preText p ++ unwrapPrint d p ++ postText p ++ d
+
+  unwrapPrint :: String -> p -> String
+
+  prettyPrintAux :: String -> [p] -> String
+  prettyPrintAux delim = foldl accumulate ""
+    where
+      accumulate acc text = acc ++ prettyPrint delim text
+
+instance PrettyBoy Md where
+  preText :: Md -> String
+  preText _ = "this is before Md"
+
+  postText :: Md -> String
+  postText _ = "this is after Md"
+
+  unwrapPrint :: String -> Md -> String
+  unwrapPrint d (Md a) = sep ++ prettyPrintAux sep a ++ d
+    where
+      sep = d ++ "    " -- wrong ?
+
+instance PrettyBoy FreeText where
+  preText :: FreeText -> String
+  preText _ = "<p>"
+
+  baseDepth :: FreeText -> String
+  baseDepth _ = ""
+
+  postText :: FreeText -> String
+  postText _ = "</p>"
+
+  unwrapPrint :: String -> FreeText -> String
+  unwrapPrint _ (FreeText a) = prettyPrintAux "" a
+
+instance PrettyBoy ModText where
+  baseDepth :: ModText -> String
+  baseDepth _ = ""
+
+  preText :: ModText -> String
+  preText (Bold _) = "<strong>"
+  preText (Italic _) = "<em>"
+  preText (StrikeThrough _) = "<del>"
+  preText (InlineCode _) = "<code>"
+  preText (Untouched _) = ""
+  preText (Link _) = "<strong>"
+  preText (Footnote _) = "<strong>"
+
+  postText :: ModText -> String
+  postText (Bold _) = "</strong>"
+  postText (Italic _) = "</em>"
+  postText (StrikeThrough _) = "</del>"
+  postText (InlineCode _) = "</code>"
+  postText (Untouched _) = ""
+  postText (Link _) = "</strong>"
+  postText (Footnote _) = "</strong>"
+
+  unwrapPrint :: String -> ModText -> String
+  unwrapPrint _ (Bold a) = prettyPrintAux "" a
+  unwrapPrint _ (Italic a) = prettyPrintAux "" a
+  unwrapPrint _ (StrikeThrough a) = prettyPrintAux "" a
+  unwrapPrint _ (InlineCode a) = a
+  unwrapPrint _ (Untouched a) = [a]
+  unwrapPrint _ (Link a) = show a
+  unwrapPrint _ (Footnote a) = show a
 
 getTime :: IO String
 getTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S" <$> getCurrentTime
 
 convertADTHTML :: Md -> String
-convertADTHTML _ = "else"
+convertADTHTML = prettyPrint "\n"

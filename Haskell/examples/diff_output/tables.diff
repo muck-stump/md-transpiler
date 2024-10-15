@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/tables.html b/examples/output/tables.html
-index 70fde47..3a69ed4 100644
+index 70fde47..6305a8c 100644
 --- a/examples/expected_output/tables.html
 +++ b/examples/output/tables.html
-@@ -1,38 +1 @@
+@@ -1,38 +1,5 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -41,5 +41,8 @@ index 70fde47..3a69ed4 100644
 -</body>
 -
 -</html>
-+el halblo
-\ No newline at end of file
++this is before Md
++    <p>| Tables        | Are           | Cool  |</p>
++    <p>| ------------- | ------------- | ----- |</p>
++    
++this is after Md

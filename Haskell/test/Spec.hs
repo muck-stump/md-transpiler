@@ -1,18 +1,27 @@
-import           Assignment           (convertADTHTML, markdownParser)
-import           Control.Exception    (IOException, try)
-import           Control.Monad        (mapM_, (>>), (>>=))
-import           Data.List            (isPrefixOf)
-import           Instances            (ParseResult (Error, Result), parse)
-import           System.FilePath      (joinPath, replaceExtension,
-                                       splitDirectories, splitFileName,
-                                       takeFileName, (</>))
-
-import           System.Directory     (createDirectoryIfMissing)
-import           System.FilePath.Glob (glob)
-import           System.IO            (IOMode (WriteMode), withFile)
-import           System.IO.Error      (isDoesNotExistError)
-import           System.Process       (StdStream (UseHandle), createProcess,
-                                       proc, std_out, waitForProcess)
+import Assignment (convertADTHTML, markdownParser)
+import Control.Exception (IOException, try)
+import Control.Monad (mapM_, (>>), (>>=))
+import Data.List (isPrefixOf)
+import Instances (ParseResult (Error, Result), parse)
+import System.Directory (createDirectoryIfMissing)
+import System.FilePath
+  ( joinPath,
+    replaceExtension,
+    splitDirectories,
+    splitFileName,
+    takeFileName,
+    (</>),
+  )
+import System.FilePath.Glob (glob)
+import System.IO (IOMode (WriteMode), withFile)
+import System.IO.Error (isDoesNotExistError)
+import System.Process
+  ( StdStream (UseHandle),
+    createProcess,
+    proc,
+    std_out,
+    waitForProcess,
+  )
 
 -- Function to replace a substring with another substring in a string
 replaceSubstring :: String -> String -> String -> String
@@ -22,7 +31,7 @@ replaceSubstring from to str@(x : xs)
   | otherwise = x : replaceSubstring from to xs
 
 processFile :: FilePath -> FilePath -> IO ()
-processFile inputFile outputFile  = do
+processFile inputFile outputFile = do
   putStrLn $ "Starting " ++ inputFile
   result <- try (readFile inputFile) :: IO (Either IOException String)
   case result of
@@ -41,21 +50,22 @@ processFile inputFile outputFile  = do
 mkFolderIfNotExists :: FilePath -> IO ()
 mkFolderIfNotExists = createDirectoryIfMissing True
 
-
 gitDiffNoIndex :: FilePath -> FilePath -> IO ()
 gitDiffNoIndex file1 file2 = do
-    mkFolderIfNotExists "./examples/diff_output"
-    let outputFile = genOutputName "diff_output" "diff" file1
+  mkFolderIfNotExists "./examples/diff_output"
+  let outputFile = genOutputName "diff_output" "diff" file1
 
-    withFile outputFile WriteMode $ \handle -> do
-      -- Create a process for git diff --no-index
-      (_, _, _, processHandle) <- createProcess (proc "git" ["--no-pager", "diff", "--no-index", "--no-ext-diff", file1, file2])
-                                                   { std_out = UseHandle handle }
+  withFile outputFile WriteMode $ \handle -> do
+    -- Create a process for git diff --no-index
+    (_, _, _, processHandle) <-
+      createProcess
+        (proc "git" ["--no-pager", "diff", "--no-index", "--no-ext-diff", file1, file2])
+          { std_out = UseHandle handle
+          }
 
-
-      -- Wait for the process to complete but ignore the exit code
-      _ <- waitForProcess processHandle
-      return ()
+    -- Wait for the process to complete but ignore the exit code
+    _ <- waitForProcess processHandle
+    return ()
 
 genOutputName :: FilePath -> String -> String -> FilePath
 genOutputName outputFolder extension file = replaceExtension (replaceFolderAtIndex file 1 outputFolder) extension
@@ -69,15 +79,15 @@ replaceFolderAtIndex filePath index newFolder = joinPath (replaceAtIndex index n
 
     -- Replace the folder at the specified index using zipWith
     replaceAtIndex :: Int -> String -> [FilePath] -> [FilePath]
-    replaceAtIndex idx newVal = zipWith (\i folder -> if i == idx then newVal else folder) [0..]
+    replaceAtIndex idx newVal = zipWith (\i folder -> if i == idx then newVal else folder) [0 ..]
 
 checkADTShow :: IO ()
 checkADTShow = do
-  let markdownStr = "test **bold**"
+  let markdownStr = "test **bold** \n others\n"
   putStrLn "Testing ADT's Show instance:"
   putStrLn $ "Input string: " ++ markdownStr
   putStrLn $ case parse markdownParser markdownStr of
-    Error _      -> "Parse error"
+    Error _ -> "Parse error"
     Result _ adt -> "Result: " ++ show adt
 
 main :: IO ()

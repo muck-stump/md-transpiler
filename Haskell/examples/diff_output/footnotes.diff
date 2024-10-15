@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/footnotes.html b/examples/output/footnotes.html
-index 2a5009f..3a69ed4 100644
+index 2a5009f..d07fcac 100644
 --- a/examples/expected_output/footnotes.html
 +++ b/examples/output/footnotes.html
-@@ -1,15 +1 @@
+@@ -1,15 +1,5 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -18,5 +18,8 @@ index 2a5009f..3a69ed4 100644
 -</body>
 -
 -</html>
-+el halblo
-\ No newline at end of file
++this is before Md
++    <p><strong>"1"</strong>: My reference.</p>
++    <p><strong>"2"</strong>:Another reference.</p>
++    
++this is after Md

@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/free_text.html b/examples/output/free_text.html
-index d178a3b..3a69ed4 100644
+index d178a3b..09033b8 100644
 --- a/examples/expected_output/free_text.html
 +++ b/examples/output/free_text.html
-@@ -1,15 +1 @@
+@@ -1,15 +1,5 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -12,11 +12,12 @@ index d178a3b..3a69ed4 100644
 -</head>
 -
 -<body>
--    <p>Here is some <strong>markdown</strong></p>
--    <p>More lines here</p>
++this is before Md
+     <p>Here is some <strong>markdown</strong></p>
+     <p>More lines here</p>
 -    <p>Text</p>
 -</body>
 -
 -</html>
-+el halblo
-\ No newline at end of file
++    
++this is after Md
