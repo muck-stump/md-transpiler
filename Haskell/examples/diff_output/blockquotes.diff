@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/blockquotes.html b/examples/output/blockquotes.html
-index 02666f2..fd9becd 100644
+index 02666f2..74a51bc 100644
 --- a/examples/expected_output/blockquotes.html
 +++ b/examples/output/blockquotes.html
-@@ -1,16 +1,5 @@
+@@ -1,16 +1,4 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -22,5 +22,5 @@ index 02666f2..fd9becd 100644
 +this is before Md
 +    <p>> This is a block quote.</p>
 +    <p>> It can <strong>span</strong> multiple lines.</p>
-+    
 +this is after Md
+\ No newline at end of file

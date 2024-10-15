@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/code.html b/examples/output/code.html
-index 57fbd64..77b0c1d 100644
+index 57fbd64..ddd4894 100644
 --- a/examples/expected_output/code.html
 +++ b/examples/output/code.html
-@@ -1,17 +1,5 @@
+@@ -1,17 +1,4 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -23,5 +23,5 @@ index 57fbd64..77b0c1d 100644
 +this is before Md
 +    <p><code></code>`haskell</p>
 +    <p>main :: IO ()</p>
-+    
 +this is after Md
+\ No newline at end of file

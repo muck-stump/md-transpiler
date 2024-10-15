@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/images.html b/examples/output/images.html
-index 1e9c518..c7e0394 100644
+index 1e9c518..7572e65 100644
 --- a/examples/expected_output/images.html
 +++ b/examples/output/images.html
-@@ -1,13 +1,5 @@
+@@ -1,13 +1,4 @@
 -<!DOCTYPE html>
 -<html lang="en">
 -
@@ -19,5 +19,5 @@ index 1e9c518..c7e0394 100644
 +this is before Md
 +    <p>!<strong>("Alt Text","image.png \"Caption Text\"")</strong></p>
 +    <p></p>
-+    
 +this is after Md
+\ No newline at end of file

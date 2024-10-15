@@ -125,18 +125,15 @@ class PrettyBoy p where
   postText :: p -> String
   postText _ = ""
 
-  baseDepth :: p -> String
-  baseDepth _ = "    "
-
   prettyPrint :: String -> p -> String
-  prettyPrint d p = preText p ++ unwrapPrint d p ++ postText p ++ d
+  prettyPrint d p = preText p ++ unwrapPrint d p ++ postText p
 
   unwrapPrint :: String -> p -> String
 
   prettyPrintAux :: String -> [p] -> String
   prettyPrintAux delim = foldl accumulate ""
     where
-      accumulate acc text = acc ++ prettyPrint delim text
+      accumulate acc text = acc ++ delim ++ prettyPrint delim text
 
 instance PrettyBoy Md where
   preText :: Md -> String
@@ -146,16 +143,13 @@ instance PrettyBoy Md where
   postText _ = "this is after Md"
 
   unwrapPrint :: String -> Md -> String
-  unwrapPrint d (Md a) = sep ++ prettyPrintAux sep a ++ d
+  unwrapPrint d (Md a) = prettyPrintAux sep a ++ d
     where
-      sep = d ++ "    " -- wrong ?
+      sep = d ++ "    "
 
 instance PrettyBoy FreeText where
   preText :: FreeText -> String
   preText _ = "<p>"
-
-  baseDepth :: FreeText -> String
-  baseDepth _ = ""
 
   postText :: FreeText -> String
   postText _ = "</p>"
@@ -164,9 +158,6 @@ instance PrettyBoy FreeText where
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
 
 instance PrettyBoy ModText where
-  baseDepth :: ModText -> String
-  baseDepth _ = ""
-
   preText :: ModText -> String
   preText (Bold _) = "<strong>"
   preText (Italic _) = "<em>"
