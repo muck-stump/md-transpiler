@@ -155,7 +155,11 @@ instance PrettyBoy FreeText where
   postText _ = "</p>"
 
   unwrapPrint :: String -> FreeText -> String
-  unwrapPrint _ (FreeText a) = prettyPrintAux "" a
+  unwrapPrint d (FreeText a) = prettyPrintAux "" a
+
+-- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
+--   where
+--     sep = d ++ "    "
 
 instance PrettyBoy ModText where
   preText :: ModText -> String
