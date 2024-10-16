@@ -354,6 +354,9 @@ trailEnd = (*>) (many whitespace)
   where
     whitespace = oneof " \t\r\n\f\v"
 
+roken :: Parser a -> Parser a
+roken = (*>) inlineSpace
+
 ----
 -- utilised parser
 ----

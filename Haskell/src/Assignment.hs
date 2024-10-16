@@ -13,7 +13,7 @@ import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.IO.Encoding.Types (CodeBuffer)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
+import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, roken, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
 import Types (FreeText)
 
 data Md = Md [Block]
@@ -123,14 +123,14 @@ pCaptionText = CaptionText <$> captionTextContent
 pFootnoteReference :: Parser Block
 pFootnoteReference = liftA2 FootnoteReference theReference theContent
   where
-    theReference = (string "[^" *> int <* is ']') <* is ':'
-    theContent = spaces *> many pBasic
+    theReference = roken $ (string "[^" *> int <* is ']') <* is ':'
+    theContent = roken $ many pBasic
 
 -- BLOCK QUOTES
 pQuote :: Parser Block
 pQuote = Quote <$> (line `sepBy1` is '\n')
   where
-    line = Line <$> (charTok '>' *> many pModText)
+    line = Line <$> roken (charTok '>' *> many pModText)
 
 -- CODE BLOCK
 pCode :: Parser Block
@@ -145,6 +145,7 @@ pHeading :: Parser Block
 pHeading = heading <|> h1alt <|> h2alt
   where
     heading = do
+      _ <- spaces
       depth <- length <$> some (is '#')
       _ <- guard (depth < 7)
       _ <- some space
@@ -155,7 +156,8 @@ pHeading = heading <|> h1alt <|> h2alt
 pHeadingAux :: Int -> Parser a -> Parser Block
 pHeadingAux depth = (Heading depth <$>) . text
   where
-    text d = some pModText <* is '\n' <* d <* some d
+    text d = roken $ some pModText <* delimiter d
+    delimiter d = is '\n' <* roken d <* some d
 
 -- BLOCK
 pBlock :: Parser Block
@@ -163,7 +165,10 @@ pBlock = pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFr
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (pBlock `sepBy` some (is '\n')) <* trailEnd eof
+markdownParser = Md <$> mdContent
+  where
+    mdContent = trailEnd blocks <* trailEnd eof
+    blocks = pBlock `sepBy` some (is '\n')
 
 -- printing classing and typing
 class PrettyBoy p where
