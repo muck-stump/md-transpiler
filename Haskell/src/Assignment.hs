@@ -6,13 +6,14 @@ import Control.Applicative
     liftA,
     liftA3,
   )
+import Control.Monad (guard)
 import Data.List (intercalate)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.IO.Encoding.Types (CodeBuffer)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, sepBy1, spaces, spaces1, string, trailEnd)
+import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
 import Types (FreeText)
 
 data Md = Md [Block]
@@ -25,6 +26,7 @@ data Block
   | FootnoteReference Int String
   | Quote [Line]
   | Code Language Program
+  | Heading Int [ModText]
   deriving (Show, Eq)
 
 data Language = Language String
@@ -137,18 +139,30 @@ pCode = liftA2 Code language program
     language = Language <$> (string "```" *> (pBasic `pUntil` is '\n'))
     program = Program <$> (char `pUntil` string "\n```" <|> string "```")
 
--- where
---   line = pBasic `pUntil` is '\n'
-
 -- HEADINGS
+
+pHeading :: Parser Block
+pHeading = heading <|> h1alt <|> h2alt
+  where
+    heading = do
+      depth <- length <$> some (is '#')
+      _ <- guard (depth < 7)
+      _ <- some space
+      Heading depth <$> some pModText
+    h1alt = hAlt (is '=') 1
+    h2alt = hAlt (is '-') 2
+    hAlt delim n = do
+      text <- some pModText
+      _ <- is '\n' <* delim <* some delim
+      return ((`Heading` text) n)
 
 -- BLOCK
 pBlock :: Parser Block
-pBlock = pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
+pBlock = pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (pBlock `sepBy` is '\n') <* trailEnd eof
+markdownParser = Md <$> (pBlock `sepBy` some (is '\n')) <* trailEnd eof
 
 -- printing classing and typing
 class PrettyBoy p where
@@ -192,12 +206,14 @@ instance PrettyBoy Block where
   preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
   preText delim (Quote _) = "<blockquote>" ++ delim ++ "    "
   preText _ (Code (Language lang) _) = "<pre><code class=\"language-" ++ lang ++ "\">"
+  preText _ (Heading depth _) = "<h" ++ show depth ++ ">"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
   postText _ Image {} = "></p>"
   postText _ (Quote _) = "</blockquote>"
   postText _ (Code {}) = "</code></pre>"
+  postText _ (Heading depth _) = "</h" ++ show depth ++ ">"
   postText _ _ = "</p>"
 
   unwrapPrint :: String -> Block -> String
@@ -208,6 +224,7 @@ instance PrettyBoy Block where
   unwrapPrint _ (Image (AltText alt) (ImgURL url) (CaptionText txt)) = "src=\"" ++ url ++ "\" alt=\"" ++ alt ++ "\" title=\"" ++ txt ++ "\""
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
   unwrapPrint _ (Code _ (Program prog)) = prog
+  unwrapPrint _ (Heading _ text) = prettyPrintAux "" text
 
 -- unwrapPrint _ _ = ""
 
