@@ -1,12 +1,11 @@
 diff --git a/examples/expected_output/ordered_list.html b/examples/output/ordered_list.html
-index 54025dc..f874c58 100644
+index 54025dc..92f1593 100644
 --- a/examples/expected_output/ordered_list.html
 +++ b/examples/output/ordered_list.html
-@@ -6,18 +6,14 @@
-     <title>Test</title>
+@@ -7,17 +7,13 @@
  </head>
  
--<body>
+ <body>
 -    <ol>
 -        <li>Item 1</li>
 -        <ol>
@@ -18,10 +17,6 @@ index 54025dc..f874c58 100644
 -        <li>Item 3</li>
 -        <li>Item 4</li>
 -    </ol>
--</body>
- 
--</html>
-+<body>
 +    <p>1. Item 1</p>
 +    <p>    1. Sub Item 1</p>
 +    <p>    2. Sub Item 2</p>
@@ -29,6 +24,8 @@ index 54025dc..f874c58 100644
 +    <p>2. <strong>Bolded Item 2</strong></p>
 +    <p>6. Item 3</p>
 +    <p>7. Item 4</p>
-+    <p></p>
-+</body></html>
+ </body>
+ 
+-</html>
++</html>
 \ No newline at end of file

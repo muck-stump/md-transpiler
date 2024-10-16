@@ -1,23 +1,20 @@
 diff --git a/examples/expected_output/free_text.html b/examples/output/free_text.html
-index d178a3b..04d5e99 100644
+index d178a3b..ffca7d3 100644
 --- a/examples/expected_output/free_text.html
 +++ b/examples/output/free_text.html
-@@ -6,10 +6,12 @@
-     <title>Test</title>
- </head>
+@@ -8,8 +8,11 @@
  
-+
  <body>
      <p>Here is some <strong>markdown</strong></p>
 -    <p>More lines here</p>
 -    <p>Text</p>
--</body>
--
--</html>
 +    <p>More lines here <em>ital</em></p>
 +    <p>Text <del>strk</del></p>
 +    <p>and <code>inline _code_</code></p>
 +    <p>this is a link to <a href="www.google.com">click here</a></p>
 +    <p>this is a footnote <sup><a id="fn1ref" href="#fn1">1</a></sup></p>
-+</body></html>
+ </body>
+ 
+-</html>
++</html>
 \ No newline at end of file

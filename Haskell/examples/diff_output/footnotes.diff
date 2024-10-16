@@ -1,22 +1,19 @@
 diff --git a/examples/expected_output/footnotes.html b/examples/output/footnotes.html
-index 2a5009f..b7474df 100644
+index 2a5009f..10b7bab 100644
 --- a/examples/expected_output/footnotes.html
 +++ b/examples/output/footnotes.html
-@@ -6,10 +6,10 @@
-     <title>Test</title>
+@@ -7,9 +7,9 @@
  </head>
  
--<body>
+ <body>
 -    <p id="#ref1">My reference.</p>
 -    <p id="#ref2">Another reference.</p>
 -    <p id="#ref3">The 2 spaces after the colon should be ignored</p>
--</body>
- 
--</html>
-+<body>
 +    <p><sup><a id="fn1ref" href="#fn1">1</a></sup>: My reference.</p>
 +    <p><sup><a id="fn2ref" href="#fn2">2</a></sup>:Another reference.</p>
 +    <p><sup><a id="fn3ref" href="#fn3">3</a></sup>:  The 2 spaces after the colon should be ignored</p>
-+    <p></p>
-+</body></html>
+ </body>
+ 
+-</html>
++</html>
 \ No newline at end of file

@@ -9,7 +9,7 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, spaces, spaces1, string)
+import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, spaces, spaces1, string, trailEnd)
 
 data Md = Md [FreeText]
   -- Your ADT **must** derive Show.
@@ -116,7 +116,7 @@ pFootnoteReference = FootnoteReference <$> refContent
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (pFreeText `sepBy` is '\n') <* eof
+markdownParser = Md <$> (pFreeText <* is '\n') `pUntil` trailEnd eof
 
 -- printing classing and typing
 class PrettyBoy p where
@@ -142,10 +142,10 @@ class PrettyBoy p where
 
 instance PrettyBoy Md where
   preText :: String -> Md -> String
-  preText _ _ = "<!DOCTYPE html>\n<html lang=\"en\">\n\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Test</title>\n</head>\n\n\n<body>"
+  preText delim _ = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim ++ "<body>"
 
   postText :: String -> Md -> String
-  postText _ _ = "</body></html>"
+  postText delim _ = "</body>" ++ delim ++ delim ++ "</html>"
 
   unwrapPrint :: String -> Md -> String
   unwrapPrint d (Md a) = prettyPrintAux sep a ++ d

@@ -349,6 +349,9 @@ sepBy1 p sep = p <:> many (sep *> p)
 sepBy :: Parser a -> Parser b -> Parser [a]
 sepBy p sep = sepBy1 p sep <|> pure []
 
+trailEnd :: Parser a -> Parser a
+trailEnd = (*>) spaces
+
 ----
 -- utilised parser
 ----

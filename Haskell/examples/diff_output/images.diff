@@ -1,18 +1,15 @@
 diff --git a/examples/expected_output/images.html b/examples/output/images.html
-index 1e9c518..80d5763 100644
+index 1e9c518..a4e8c6c 100644
 --- a/examples/expected_output/images.html
 +++ b/examples/output/images.html
-@@ -6,8 +6,8 @@
-     <title>Test</title>
+@@ -7,7 +7,7 @@
  </head>
  
--<body>
+ <body>
 -    <p><img src="image.png" alt="Alt Text" title="Caption Text"></p>
--</body>
++    <p>!<a href="image.png "Caption Text"">Alt Text</a></p>
+ </body>
  
 -</html>
-+<body>
-+    <p>!<a href="image.png "Caption Text"">Alt Text</a></p>
-+    <p></p>
-+</body></html>
++</html>
 \ No newline at end of file
