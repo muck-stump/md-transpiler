@@ -3,10 +3,12 @@ module Assignment (markdownParser, convertADTHTML) where
 import Control.Applicative
   ( Alternative (many, some, (<|>)),
     Applicative (liftA2),
+    liftA,
     liftA3,
   )
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
+import GHC.IO.Encoding.Types (CodeBuffer)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
 import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, sepBy1, spaces, spaces1, string, trailEnd)
@@ -21,6 +23,16 @@ data Block
   | Image AltText ImgURL CaptionText
   | FootnoteReference Int String
   | Quote [Line]
+  | Code Language Program
+  deriving (Show, Eq)
+
+data Language = Language String
+  deriving (Show, Eq)
+
+data Program = Program [CodeLine]
+  deriving (Show, Eq)
+
+data CodeLine = CodeLine String
   deriving (Show, Eq)
 
 data Line = Line [ModText]
@@ -117,11 +129,20 @@ pQuote = Quote <$> (line `sepBy1` is '\n')
   where
     line = Line <$> (charTok '>' *> many pModText)
 
+-- CODE BLOCK
+pCode :: Parser Block
+pCode = liftA2 Code language program
+  where
+    language = Language <$> (string "```" *> (pBasic `pUntil` is '\n'))
+    program = Program <$> (line `pUntil` string "```")
+      where
+        line = CodeLine <$> pBasic `pUntil` is '\n'
+
 -- HEADINGS
 
 -- BLOCK
 pBlock :: Parser Block
-pBlock = pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
+pBlock = pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser Md
@@ -166,11 +187,13 @@ instance PrettyBoy Block where
   preText _ Image {} = "<p><img "
   preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
   preText _ (Quote _) = "<blockquote>"
+  preText _ (Code (Language lang) _) = "<pre><code class=\"" ++ lang ++ "\">"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
   postText _ Image {} = "></p>"
   postText _ (Quote _) = "</blockquote>"
+  postText _ (Code {}) = "</code></pre>"
   postText _ _ = "</p>"
 
   unwrapPrint :: String -> Block -> String
@@ -180,12 +203,18 @@ instance PrettyBoy Block where
   unwrapPrint _ (FootnoteReference _ txt) = txt
   unwrapPrint _ (Image (AltText alt) (ImgURL url) (CaptionText txt)) = "src=\"" ++ url ++ "\" alt=\"" ++ alt ++ "\" title=\"" ++ txt ++ "\""
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
+  unwrapPrint d (Code _ (Program prog)) = prettyPrintAux d prog ++ d
 
 -- unwrapPrint _ _ = ""
 
 -- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
 --   where
 --     sep = d ++ "    "
+
+instance PrettyBoy CodeLine where
+  unwrapPrint :: String -> CodeLine -> String
+  unwrapPrint _ (CodeLine str) = str
+
 instance PrettyBoy Line where
   preText :: String -> Line -> String
   preText _ _ = "<p>"

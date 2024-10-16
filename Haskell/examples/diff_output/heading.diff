@@ -1,8 +1,8 @@
 diff --git a/examples/expected_output/heading.html b/examples/output/heading.html
-index a2d6b22..f92e871 100644
+index a2d6b22..45cc736 100644
 --- a/examples/expected_output/heading.html
 +++ b/examples/output/heading.html
-@@ -7,15 +7,19 @@
+@@ -7,15 +7,20 @@
  </head>
  
  <body>
@@ -28,6 +28,7 @@ index a2d6b22..f92e871 100644
 +    <p>---------------</p>
 +    <p></p>
 +    <p># <strong>Bolded Heading 1</strong></p>
++    <p></p>
  </body>
  
  </html>

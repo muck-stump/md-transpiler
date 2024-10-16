@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/code.html b/examples/output/code.html
-index 57fbd64..d82477a 100644
+index 57fbd64..4771a05 100644
 --- a/examples/expected_output/code.html
 +++ b/examples/output/code.html
 @@ -7,11 +7,13 @@
@@ -11,13 +11,13 @@ index 57fbd64..d82477a 100644
 -putStrLn "Never gonna give you up"
 -putStrLn "Never gonna let you down"
 -putStrLn "Never gonna run around and desert you"</code></pre>
-+    <p><code></code>`haskell</p>
-+    <p>main :: IO ()</p>
-+    <p>main = do</p>
-+    <p>putStrLn "Never gonna give you up"</p>
-+    <p>putStrLn "Never gonna let you down"</p>
-+    <p>putStrLn "Never gonna run around and desert you"</p>
-+    <p><code></code>`</p>
++    <pre><code class="haskell">
++    main :: IO ()
++    main = do
++    putStrLn "Never gonna give you up"
++    putStrLn "Never gonna let you down"
++    putStrLn "Never gonna run around and desert you"
++    </code></pre>
  </body>
  
  </html>
