@@ -149,12 +149,13 @@ pHeading = heading <|> h1alt <|> h2alt
       _ <- guard (depth < 7)
       _ <- some space
       Heading depth <$> some pModText
-    h1alt = hAlt (is '=') 1
-    h2alt = hAlt (is '-') 2
-    hAlt delim n = do
-      text <- some pModText
-      _ <- is '\n' <* delim <* some delim
-      return ((`Heading` text) n)
+    h1alt = pHeadingAux 1 (is '=')
+    h2alt = pHeadingAux 2 (is '-')
+
+pHeadingAux :: Int -> Parser a -> Parser Block
+pHeadingAux depth = (Heading depth <$>) . text
+  where
+    text d = some pModText <* is '\n' <* d <* some d
 
 -- BLOCK
 pBlock :: Parser Block
