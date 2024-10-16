@@ -18,6 +18,7 @@ data Md = Md [Block]
 data Block
   = FreeText [ModText]
   | Image AltText ImgURL CaptionText
+  | FootnoteReference Int String
   deriving (Show, Eq)
 
 -- ask how to make this seperate types
@@ -38,9 +39,6 @@ data ImgURL = ImgURL String
   deriving (Show, Eq)
 
 data CaptionText = CaptionText String
-  deriving (Show, Eq)
-
-data FootnoteReference = FootnoteReference (ModText, String)
   deriving (Show, Eq)
 
 -- stuff?
@@ -102,20 +100,17 @@ pCaptionText = CaptionText <$> captionTextContent
     captionTextContent = pBasic `pBetween` is '\"' <* is ')'
 
 --- FOOTNOTE REFERENCES
-pFootnoteReference :: Parser FootnoteReference
-pFootnoteReference = FootnoteReference <$> refContent
+pFootnoteReference :: Parser Block
+pFootnoteReference = liftA2 FootnoteReference theReference theContent
   where
-    refContent = liftA2 (,) theReference theContent
-    theReference = pFootnote <* is ':'
+    theReference = (string "[^" *> int <* is ']') <* is ':'
     theContent = spaces *> many pBasic
 
 -- HEADINGS
 
--- LINES
-
 -- BLOCK
 pBlock :: Parser Block
-pBlock = pImage <|> pFreeText
+pBlock = pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser Md
@@ -157,14 +152,16 @@ instance PrettyBoy Md where
 
 instance PrettyBoy Block where
   preText :: String -> Block -> String
-  preText _ (Image _ _ _) = "<img "
+  preText _ Image {} = "<img "
+  preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
-  postText _ (Image _ _ _) = ">"
+  postText _ Image {} = ">"
   postText _ _ = "</p>"
 
   unwrapPrint :: String -> Block -> String
+  unwrapPrint _ (FootnoteReference _ txt) = txt
   unwrapPrint _ (Image (AltText alt) (ImgURL url) (CaptionText txt)) = "src=\"" ++ url ++ "\" alt=\"" ++ alt ++ "\" title=\"" ++ txt ++ "\""
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
 
