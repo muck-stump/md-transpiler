@@ -10,6 +10,7 @@ import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
 import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, spaces, spaces1, string, trailEnd)
+import Types (FreeText)
 
 data Md = Md [Block]
   -- Your ADT **must** derive Show.
@@ -19,6 +20,10 @@ data Block
   = FreeText [ModText]
   | Image AltText ImgURL CaptionText
   | FootnoteReference Int String
+  | Quote [Line]
+  deriving (Show, Eq)
+
+data Line = Line [ModText]
   deriving (Show, Eq)
 
 -- ask how to make this seperate types
@@ -106,11 +111,17 @@ pFootnoteReference = liftA2 FootnoteReference theReference theContent
     theReference = (string "[^" *> int <* is ']') <* is ':'
     theContent = spaces *> many pBasic
 
+-- BLOCKQUOTES
+pQuote :: Parser Block
+pQuote = Quote <$> (line `sepBy` is '\n')
+  where
+    line = Line <$> (is '>' *> spaces *> many pModText)
+
 -- HEADINGS
 
 -- BLOCK
 pBlock :: Parser Block
-pBlock = pFootnoteReference <|> pImage <|> pFreeText
+pBlock = pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser Md
@@ -143,7 +154,7 @@ instance PrettyBoy Md where
   preText delim _ = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim ++ "<body>"
 
   postText :: String -> Md -> String
-  postText delim _ = "</body>" ++ delim ++ delim ++ "</html>"
+  postText delim _ = "</body>" ++ delim ++ delim ++ "</html>" ++ delim
 
   unwrapPrint :: String -> Md -> String
   unwrapPrint d (Md a) = prettyPrintAux sep a ++ d
@@ -154,13 +165,18 @@ instance PrettyBoy Block where
   preText :: String -> Block -> String
   preText _ Image {} = "<img "
   preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
+  preText _ (Quote _) = "<blockquote>"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
   postText _ Image {} = ">"
+  postText _ (Quote _) = "</blockquote>"
   postText _ _ = "</p>"
 
   unwrapPrint :: String -> Block -> String
+  unwrapPrint d (Quote a) = prettyPrintAux sep a ++ d
+    where
+      sep = d ++ "    "
   unwrapPrint _ (FootnoteReference _ txt) = txt
   unwrapPrint _ (Image (AltText alt) (ImgURL url) (CaptionText txt)) = "src=\"" ++ url ++ "\" alt=\"" ++ alt ++ "\" title=\"" ++ txt ++ "\""
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
@@ -170,6 +186,15 @@ instance PrettyBoy Block where
 -- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
 --   where
 --     sep = d ++ "    "
+instance PrettyBoy Line where
+  preText :: String -> Line -> String
+  preText _ _ = "<p>"
+
+  postText :: String -> Line -> String
+  postText _ _ = "</p>"
+
+  unwrapPrint :: String -> Line -> String
+  unwrapPrint _ (Line a) = prettyPrintAux "" a
 
 instance PrettyBoy ModText where
   preText :: String -> ModText -> String
