@@ -11,11 +11,13 @@ import GHC.TypeLits (Mod)
 import Instances (Parser (..))
 import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, spaces, spaces1, string, trailEnd)
 
-data Md = Md [FreeText]
+data Md = Md [Block]
   -- Your ADT **must** derive Show.
   deriving (Show, Eq)
 
-data FreeText = FreeText [ModText]
+data Block
+  = FreeText [ModText]
+  | Image AltText ImgURL CaptionText
   deriving (Show, Eq)
 
 -- ask how to make this seperate types
@@ -27,9 +29,6 @@ data ModText
   | Untouched Char
   | Link (String, String)
   | Footnote Int
-  deriving (Show, Eq)
-
-data Image = Image AltText ImgURL CaptionText
   deriving (Show, Eq)
 
 data AltText = AltText String
@@ -80,12 +79,12 @@ pUntouched = Untouched <$> pBasic
 pModText :: Parser ModText
 pModText = pBold <|> pItalic <|> pStrikeThrough <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
 
-pFreeText :: Parser FreeText
+pFreeText :: Parser Block
 pFreeText = FreeText <$> many pModText
 
 -- PARSE IMAGES
-pImage :: Parser Image
-pImage = Image <$> pAltText <*> pImgURL <*> pCaptionText
+pImage :: Parser Block
+pImage = liftA3 Image pAltText pImgURL pCaptionText
 
 pAltText :: Parser AltText
 pAltText = AltText <$> altTextContent
@@ -95,12 +94,12 @@ pAltText = AltText <$> altTextContent
 pImgURL :: Parser ImgURL
 pImgURL = ImgURL <$> imgURLContent
   where
-    imgURLContent = is '(' *> pBasic `pUntil` is ' ' <* spaces1
+    imgURLContent = is '(' *> pBasic `pUntil` is ' ' <* spaces -- validate the no space thing i guess?
 
 pCaptionText :: Parser CaptionText
 pCaptionText = CaptionText <$> captionTextContent
   where
-    captionTextContent = pBasic `pBetween` is '\"'
+    captionTextContent = pBasic `pBetween` is '\"' <* is ')'
 
 --- FOOTNOTE REFERENCES
 pFootnoteReference :: Parser FootnoteReference
@@ -114,9 +113,13 @@ pFootnoteReference = FootnoteReference <$> refContent
 
 -- LINES
 
+-- BLOCK
+pBlock :: Parser Block
+pBlock = pImage <|> pFreeText
+
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (pFreeText <* is '\n') `pUntil` trailEnd eof
+markdownParser = Md <$> (pBlock <* is '\n') `pUntil` trailEnd eof
 
 -- printing classing and typing
 class PrettyBoy p where
@@ -152,15 +155,20 @@ instance PrettyBoy Md where
     where
       sep = d ++ "    "
 
-instance PrettyBoy FreeText where
-  preText :: String -> FreeText -> String
+instance PrettyBoy Block where
+  preText :: String -> Block -> String
+  preText _ (Image _ _ _) = "<img "
   preText _ _ = "<p>"
 
-  postText :: String -> FreeText -> String
+  postText :: String -> Block -> String
+  postText _ (Image _ _ _) = ">"
   postText _ _ = "</p>"
 
-  unwrapPrint :: String -> FreeText -> String
+  unwrapPrint :: String -> Block -> String
+  unwrapPrint _ (Image (AltText alt) (ImgURL url) (CaptionText txt)) = "src=\"" ++ url ++ "\" alt=\"" ++ alt ++ "\" title=\"" ++ txt ++ "\""
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
+
+-- unwrapPrint _ _ = ""
 
 -- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
 --   where
