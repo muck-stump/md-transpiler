@@ -6,6 +6,7 @@ import Control.Applicative
     liftA,
     liftA3,
   )
+import Data.List (intercalate)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.IO.Encoding.Types (CodeBuffer)
@@ -29,7 +30,7 @@ data Block
 data Language = Language String
   deriving (Show, Eq)
 
-data Program = Program [CodeLine]
+data Program = Program String
   deriving (Show, Eq)
 
 data CodeLine = CodeLine String
@@ -134,9 +135,10 @@ pCode :: Parser Block
 pCode = liftA2 Code language program
   where
     language = Language <$> (string "```" *> (pBasic `pUntil` is '\n'))
-    program = Program <$> (line `pUntil` string "```")
-      where
-        line = CodeLine <$> pBasic `pUntil` is '\n'
+    program = Program <$> (char `pUntil` string "\n```" <|> string "```")
+
+-- where
+--   line = pBasic `pUntil` is '\n'
 
 -- HEADINGS
 
@@ -166,13 +168,15 @@ class PrettyBoy p where
   unwrapPrint :: String -> p -> String
 
   prettyPrintAux :: String -> [p] -> String
-  prettyPrintAux delim = foldl accumulate ""
-    where
-      accumulate acc text = acc ++ delim ++ prettyPrint delim text
+  prettyPrintAux delim res = intercalate delim (prettyPrint delim <$> res)
+
+-- prettyPrintAux delim = foldl accumulate ""
+--   where
+--     accumulate acc text = acc ++ delim ++ prettyPrint delim text
 
 instance PrettyBoy Md where
   preText :: String -> Md -> String
-  preText delim _ = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim ++ "<body>"
+  preText delim _ = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim ++ "<body>" ++ delim ++ "    "
 
   postText :: String -> Md -> String
   postText delim _ = "</body>" ++ delim ++ delim ++ "</html>" ++ delim
@@ -186,8 +190,8 @@ instance PrettyBoy Block where
   preText :: String -> Block -> String
   preText _ Image {} = "<p><img "
   preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
-  preText _ (Quote _) = "<blockquote>"
-  preText _ (Code (Language lang) _) = "<pre><code class=\"" ++ lang ++ "\">"
+  preText delim (Quote _) = "<blockquote>" ++ delim ++ "    "
+  preText _ (Code (Language lang) _) = "<pre><code class=\"language-" ++ lang ++ "\">"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
@@ -203,7 +207,7 @@ instance PrettyBoy Block where
   unwrapPrint _ (FootnoteReference _ txt) = txt
   unwrapPrint _ (Image (AltText alt) (ImgURL url) (CaptionText txt)) = "src=\"" ++ url ++ "\" alt=\"" ++ alt ++ "\" title=\"" ++ txt ++ "\""
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
-  unwrapPrint d (Code _ (Program prog)) = prettyPrintAux d prog ++ d
+  unwrapPrint _ (Code _ (Program prog)) = prog
 
 -- unwrapPrint _ _ = ""
 
