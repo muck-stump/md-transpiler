@@ -9,7 +9,7 @@ import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, spaces, spaces1, string, trailEnd)
+import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, sepBy, sepBy1, spaces, spaces1, string, trailEnd)
 import Types (FreeText)
 
 data Md = Md [Block]
@@ -83,7 +83,7 @@ pModText :: Parser ModText
 pModText = pBold <|> pItalic <|> pStrikeThrough <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
 
 pFreeText :: Parser Block
-pFreeText = FreeText <$> many pModText
+pFreeText = FreeText <$> some pModText
 
 -- PARSE IMAGES
 pImage :: Parser Block
@@ -111,11 +111,11 @@ pFootnoteReference = liftA2 FootnoteReference theReference theContent
     theReference = (string "[^" *> int <* is ']') <* is ':'
     theContent = spaces *> many pBasic
 
--- BLOCKQUOTES
+-- BLOCK QUOTES
 pQuote :: Parser Block
-pQuote = Quote <$> (line `sepBy` is '\n')
+pQuote = Quote <$> (line `sepBy1` is '\n')
   where
-    line = Line <$> (is '>' *> spaces *> many pModText)
+    line = Line <$> (charTok '>' *> many pModText)
 
 -- HEADINGS
 
@@ -125,7 +125,7 @@ pBlock = pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (pBlock <* is '\n') `pUntil` trailEnd eof
+markdownParser = Md <$> (pBlock `sepBy` is '\n') <* trailEnd eof
 
 -- printing classing and typing
 class PrettyBoy p where
@@ -163,13 +163,13 @@ instance PrettyBoy Md where
 
 instance PrettyBoy Block where
   preText :: String -> Block -> String
-  preText _ Image {} = "<img "
+  preText _ Image {} = "<p><img "
   preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
   preText _ (Quote _) = "<blockquote>"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
-  postText _ Image {} = ">"
+  postText _ Image {} = "></p>"
   postText _ (Quote _) = "</blockquote>"
   postText _ _ = "</p>"
 

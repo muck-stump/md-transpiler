@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/code.html b/examples/output/code.html
-index 57fbd64..6e26c53 100644
+index 57fbd64..d82477a 100644
 --- a/examples/expected_output/code.html
 +++ b/examples/output/code.html
 @@ -7,11 +7,13 @@
@@ -20,6 +20,4 @@ index 57fbd64..6e26c53 100644
 +    <p><code></code>`</p>
  </body>
  
--</html>
-+</html>
-\ No newline at end of file
+ </html>

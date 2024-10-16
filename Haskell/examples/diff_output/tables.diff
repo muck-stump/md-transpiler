@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/tables.html b/examples/output/tables.html
-index 70fde47..6a9dcdb 100644
+index 70fde47..773ce27 100644
 --- a/examples/expected_output/tables.html
 +++ b/examples/output/tables.html
 @@ -7,32 +7,11 @@
@@ -39,6 +39,4 @@ index 70fde47..6a9dcdb 100644
 +    <p>| here | is also | <strong>bolded data</strong> |</p>
  </body>
  
--</html>
-+</html>
-\ No newline at end of file
+ </html>

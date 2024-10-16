@@ -331,7 +331,7 @@ stringTok = tok . string
 -- does not save the parsing of b
 -- can parse a 0 times
 pUntil :: Parser a -> Parser b -> Parser [a]
-pUntil a b = ([] <$ b) <|> liftA2 (:) a (pUntil a b)
+pUntil a b = ([] <$ b) <|> liftA2 (:) a (a `pUntil` b)
 
 -- parse b, then parse a until first parse b succeeds
 -- >>> parse (char `pBetween` string "**") "**abc**"
@@ -350,7 +350,9 @@ sepBy :: Parser a -> Parser b -> Parser [a]
 sepBy p sep = sepBy1 p sep <|> pure []
 
 trailEnd :: Parser a -> Parser a
-trailEnd = (*>) spaces
+trailEnd = (*>) (many whitespace)
+  where
+    whitespace = oneof " \t\r\n\f\v"
 
 ----
 -- utilised parser

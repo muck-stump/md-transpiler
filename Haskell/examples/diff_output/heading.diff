@@ -1,5 +1,5 @@
 diff --git a/examples/expected_output/heading.html b/examples/output/heading.html
-index a2d6b22..547438f 100644
+index a2d6b22..f92e871 100644
 --- a/examples/expected_output/heading.html
 +++ b/examples/output/heading.html
 @@ -7,15 +7,19 @@
@@ -30,6 +30,4 @@ index a2d6b22..547438f 100644
 +    <p># <strong>Bolded Heading 1</strong></p>
  </body>
  
--</html>
-+</html>
-\ No newline at end of file
+ </html>
