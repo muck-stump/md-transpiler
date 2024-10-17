@@ -130,14 +130,14 @@ pFootnoteReference = pad $ liftA2 FootnoteReference theReference theContent
 pQuote :: Parser Block
 pQuote = pad $ Quote <$> (line `sepBy1` is '\n')
   where
-    line = Line <$> roken (charTok '>' *> many pModText)
+    line = Line <$> (inlineSpace *> charTok '>' *> many pModText)
 
 -- CODE BLOCK
 pCode :: Parser Block
 pCode = pad $ liftA2 Code language program
   where
-    language = Language <$> (string "```" *> (pBasic `pUntil` is '\n'))
-    program = Program <$> (char `pUntil` string "\n```" <|> string "```")
+    language = Language <$> (string "```" *> (pBasic `pUntil` (inlineSpace *> newline)))
+    program = Program <$> (char `pUntil` (spaces *> string "```"))
 
 -- HEADINGS
 
