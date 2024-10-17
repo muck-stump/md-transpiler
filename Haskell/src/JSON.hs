@@ -1,3 +1,8 @@
+-- FROM APPLIED
+-- FROM APPLIED
+-- FROM APPLIED
+-- FROM APPLIED
+
 -- | Implement a limited JSON parser.
 --
 -- Use the provided JsonValue type to create a parser for JSON values.
@@ -221,7 +226,7 @@ sepBy a b = sepBy1 a b <|> pure []
 -- >>> parse quoteString "\"\\abc\"def"
 -- Just ("def","\\abc")
 quoteString :: Parser String
-quoteString = is '\"' *> some (isNot '"') <* isTok '\"'
+quoteString = is '\"' *> many (isNot '"') <* isTok '\"'
 
 -- | Parse a JSON string. Handle double-quotes.
 --

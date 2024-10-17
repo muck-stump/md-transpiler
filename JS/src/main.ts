@@ -61,7 +61,10 @@ function getHTML(s: State): Observable<State> {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: `{ "save" : ${s.save}, "content" : "${s.markdown}" }`,
+        body: `{ 
+            "save": ${s.save}, 
+            "content": "${s.markdown}"
+        }`, // simple json object in the same format as the JSON parser
     }).pipe(
         map((response) => response.response), // Extracting the response data
         map((data) => {

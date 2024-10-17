@@ -6,7 +6,7 @@ import Control.Applicative
     liftA2,
     liftA3,
   )
-import Control.Monad (guard)
+import Control.Monad (guard, replicateM, void)
 import Data.List (intercalate)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
@@ -27,6 +27,25 @@ data Block
   | Quote [Line]
   | Code Language Program
   | Heading Int [ModText]
+  | Table Head Body
+  deriving (Show, Eq)
+
+data Head = Head HeadRow
+  deriving (Show, Eq)
+
+data HeadRow = HeadRow [HeadCell]
+  deriving (Show, Eq)
+
+data Body = Body [Row]
+  deriving (Show, Eq)
+
+data Row = Row [Cell]
+  deriving (Show, Eq)
+
+data Cell = Cell [ModText]
+  deriving (Show, Eq)
+
+data HeadCell = HeadCell [ModText]
   deriving (Show, Eq)
 
 data Language = Language String
@@ -151,13 +170,53 @@ pHeading = pad $ heading <|> h1alt <|> h2alt
       _ <- some space
       Heading depth <$> some pModText
     h1alt = pHeadingAux 1 (is '=')
-    h2alt = pHeadingAux 2 (is '-')
+    h2alt = pHeadingAux 2 dash
 
 pHeadingAux :: Int -> Parser a -> Parser Block
 pHeadingAux depth = (Heading depth <$>) . text
   where
     text d = roken $ some pModText <* delimiter d
     delimiter d = is '\n' <* roken d <* some d <* inlineSpace
+
+-- TABLES
+
+pHeadRow :: Parser Head
+pHeadRow = Head <$> (HeadRow <$> (pipe *> some cells))
+  where
+    cells = HeadCell <$> (pModText `pUntil` (inlineSpace *> pipe))
+
+pSeparator :: Int -> Parser () --- at least 3 '-' in each section
+pSeparator = pad . (*>) pipe . separator --- same number of columns as head
+  where
+    separator = void <$> (`replicateM` line)
+    line = cell *> dash `pUntil` pipe
+    cell = replicateM 3 dash
+
+pRow :: Int -> Parser Row
+pRow = pad . (*>) pipe . row
+  where
+    row = (Row <$>) <$> (`replicateM` cells)
+    cells = Cell <$> (pModText `pUntil` (inlineSpace *> pipe))
+
+pipe :: Parser Char
+pipe = charTok '|'
+
+dash :: Parser Char
+dash = charTok '-'
+
+pTable :: Parser Block
+pTable = do
+  headRow <- pHeadRow
+  let width = headLength headRow
+  _ <- pSeparator width
+  rows <- many (pRow width)
+  return (Table headRow (Body rows))
+  where
+    headLength (Head (HeadRow lst)) = length lst
+
+-- parse a first row -> list
+-- parse a separator (at least 3 '-' in each section) (right length)
+-- parse many filler rows (right length)
 
 -- PADDING
 -- before the block is MANY number of whitespaces of any kind
@@ -173,7 +232,7 @@ pad = padBefore . padAfter
 
 -- BLOCK
 pBlock :: Parser Block
-pBlock = pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
+pBlock = pTable <|> pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser Md
@@ -211,17 +270,17 @@ instance PrettyBoy Md where
   postText delim _ = "</body>" ++ delim ++ delim ++ "</html>" ++ delim
 
   unwrapPrint :: String -> Md -> String
-  unwrapPrint d (Md a) = prettyPrintAux sep a ++ d
-    where
-      sep = d ++ "    "
+  unwrapPrint d (Md a) = prettyPrintAux (d ++ "    ") a ++ d
 
 instance PrettyBoy Block where
   preText :: String -> Block -> String
   preText _ Image {} = "<p><img "
   preText _ (FootnoteReference n _) = "<p id=\"fn" ++ show n ++ "\">"
   preText delim (Quote _) = "<blockquote>" ++ delim ++ "    "
+  preText _ (Code (Language "") _) = "<pre><code>"
   preText _ (Code (Language lang) _) = "<pre><code class=\"language-" ++ lang ++ "\">"
   preText _ (Heading depth _) = "<h" ++ show depth ++ ">"
+  preText _ (Table {}) = "<table>"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
@@ -229,10 +288,19 @@ instance PrettyBoy Block where
   postText _ (Quote _) = "</blockquote>"
   postText _ (Code {}) = "</code></pre>"
   postText _ (Heading depth _) = "</h" ++ show depth ++ ">"
+  postText _ (Table {}) = "</table>"
   postText _ _ = "</p>"
 
   unwrapPrint :: String -> Block -> String
   unwrapPrint d (Quote a) = prettyPrintAux sep a ++ d
+    where
+      sep = d ++ "    "
+  unwrapPrint d (Table hd bd) =
+    sep
+      ++ prettyPrint sep hd
+      ++ sep
+      ++ prettyPrint sep bd
+      ++ d
     where
       sep = d ++ "    "
   unwrapPrint _ (FootnoteReference _ txt) = txt
@@ -241,9 +309,69 @@ instance PrettyBoy Block where
   unwrapPrint _ (Code _ (Program prog)) = prog
   unwrapPrint _ (Heading _ text) = prettyPrintAux "" text
 
+-- unwrapPrint _ _ = undefined
+
 -- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
 --   where
 --     sep = d ++ "    "
+
+instance PrettyBoy Cell where
+  preText :: String -> Cell -> String
+  preText _ _ = "<td>"
+  postText :: String -> Cell -> String
+  postText _ _ = "</td>"
+  unwrapPrint :: String -> Cell -> String
+  unwrapPrint _ (Cell a) = prettyPrintAux "" a
+
+instance PrettyBoy HeadCell where
+  preText :: String -> HeadCell -> String
+  preText _ _ = "<th>"
+  postText :: String -> HeadCell -> String
+  postText _ _ = "</th>"
+  unwrapPrint :: String -> HeadCell -> String
+  unwrapPrint _ (HeadCell a) = prettyPrintAux "" a
+
+instance PrettyBoy Head where
+  preText :: String -> Head -> String
+  preText _ _ = "<thead>"
+  postText :: String -> Head -> String
+  postText _ _ = "</thead>"
+  unwrapPrint :: String -> Head -> String
+  unwrapPrint d (Head a) = sep ++ prettyPrint sep a ++ d
+    where
+      sep = d ++ "    "
+
+instance PrettyBoy HeadRow where
+  preText :: String -> HeadRow -> String
+  preText _ _ = "<tr>"
+  postText :: String -> HeadRow -> String
+  postText _ _ = "</tr>"
+  unwrapPrint :: String -> HeadRow -> String
+  unwrapPrint d (HeadRow a) = sep ++ prettyPrintAux sep a ++ d
+    where
+      sep = d ++ "    "
+
+instance PrettyBoy Body where
+  preText :: String -> Body -> String
+  preText _ _ = "<tbody>"
+
+  postText :: String -> Body -> String
+  postText _ _ = "</tbody>"
+
+  unwrapPrint :: String -> Body -> String
+  unwrapPrint d (Body rows) = sep ++ prettyPrintAux sep rows ++ d
+    where
+      sep = d ++ "    "
+
+instance PrettyBoy Row where
+  preText :: String -> Row -> String
+  preText _ _ = "<tr>"
+  postText :: String -> Row -> String
+  postText _ _ = "</tr>"
+  unwrapPrint :: String -> Row -> String
+  unwrapPrint d (Row a) = sep ++ prettyPrintAux sep a ++ d
+    where
+      sep = d ++ "    "
 
 instance PrettyBoy CodeLine where
   unwrapPrint :: String -> CodeLine -> String

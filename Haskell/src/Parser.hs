@@ -283,7 +283,7 @@ string = traverse is
 -- >>> parse (tok (is 'a')) "abc"
 -- Result >bc< 'a'
 tok :: Parser a -> Parser a
-tok = (<* spaces)
+tok = (<* inlineSpace)
 
 -- tok p = do
 --   r <- p

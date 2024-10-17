@@ -35,22 +35,19 @@ jsonResponse pairs =
 main :: IO ()
 main = scotty 3000 $ do
   post "/api/convertMD" $ do
-    requestBody <- body -- this is (originally) s.markdown in main.ts. I've set this to make all the state
+    requestBody <- body
     -- Convert the raw request body from ByteString to Text
     let requestBodyText = decodeUtf8 requestBody
         -- Convert the Text to String
         str = unpack requestBodyText
         wrappedObj = unwrapJSON (parse thisJson str)
-        obj = getString $ getKey "content" wrappedObj
-        save = getBool $ getKey "save" wrappedObj
-        -- obj = decode requestBody :: Maybe (Map String String)
+        content = getString $ getKey "content" wrappedObj -- content of markdown file
+        save = getBool $ getKey "save" wrappedObj -- whether the file should be saved
         -- decode str into save and content
         -- markdownParser gets run with content
         -- Parse the Markdown string using 'markdownParser' and apply 'convertAllHTML'
-        converted_html = getResult (parse markdownParser obj) convertADTHTML
-    when save $
-      liftIO $
-        getTime >>= (`writeFile` converted_html) . (++ ".html")
+        converted_html = getResult (parse markdownParser content) convertADTHTML
+    when save $ liftIO $ getTime >>= (`writeFile` converted_html) . (++ ".html")
 
     -- Respond with the converted HTML as JSON
     jsonResponse [("html", converted_html)]
