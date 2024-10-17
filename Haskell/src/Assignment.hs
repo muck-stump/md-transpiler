@@ -131,7 +131,7 @@ pAltText = AltText <$> altTextContent
 pImgURL :: Parser ImgURL
 pImgURL = ImgURL <$> imgURLContent
   where
-    imgURLContent = is '(' *> pBasic `pUntil` spaces
+    imgURLContent = is '(' *> pBasic `pUntil` spaces1
 
 pCaptionText :: Parser CaptionText
 pCaptionText = CaptionText <$> captionTextContent
