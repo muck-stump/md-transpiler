@@ -19,12 +19,15 @@ const markdownInput = document.getElementById(
     "markdown-input",
 ) as HTMLTextAreaElement;
 const checkbox = document.querySelector('input[name="checkbox"]')!;
+const saver = document.getElementById("save-button")!;
 
 type Action = (_: State) => State;
 
 const resetState: Action = (s) => {
-    return { ...s, save: false };
+    return { ...s, save: false};
 };
+
+// i take the reset button from monte carlo and i put it in the thing
 
 const compose =
     <T, U>(g: (_: T) => U) =>
@@ -38,13 +41,17 @@ const input$: Observable<Action> = fromEvent<KeyboardEvent>(
     "input",
 ).pipe(
     map((event) => (event.target as HTMLInputElement).value),
-    map((value) => (s) => ({ ...s, markdown: value })),
+    map((value) => (s) => ({ ...s, markdown: value})),
 );
 
 const checkboxStream$: Observable<Action> = fromEvent(checkbox, "change").pipe(
     map((event) => (event.target as HTMLInputElement).checked),
-    map((value) => (s) => ({ ...s, renderHTML: value })),
+    map((value) => (s) => ({ ...s, renderHTML: value})),
 );
+
+const $save: Observable<Action> = fromEvent(saver, "click").pipe(
+    map(event => ( (s:State) => ({...s, save: true}))
+))
 
 function getHTML(s: State): Observable<State> {
     // Get the HTML as a stream
@@ -54,7 +61,7 @@ function getHTML(s: State): Observable<State> {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: s.markdown,
+        body: `{ "save" : ${s.save}, "content" : "${s.markdown}" }`,
     }).pipe(
         map((response) => response.response), // Extracting the response data
         map((data) => {
@@ -67,6 +74,8 @@ function getHTML(s: State): Observable<State> {
     );
 }
 
+// i give more info to body (not just s.markwon) s.markdown so it knows if i hit save
+
 const initialState: State = {
     markdown: "",
     HTML: "",
@@ -74,15 +83,14 @@ const initialState: State = {
     save: false,
 };
 
+const refreshers$ = merge(input$, checkboxStream$).pipe(
+    map((reducer: Action) => compose(reducer)(resetState))
+)
+
 function main() {
     // Subscribe to the input Observable to listen for changes
-    const subscription = merge(input$, checkboxStream$)
+    const subscription = merge(refreshers$, $save)
         .pipe(
-            map((reducer: Action) => {
-                // Reset Some variables in the state in every tick
-                const newReducer = compose(reducer)(resetState);
-                return newReducer;
-            }),
             mergeScan((acc: State, reducer: Action) => {
                 const newState = reducer(acc);
                 // getHTML returns an observable of length one

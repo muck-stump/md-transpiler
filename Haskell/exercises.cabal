@@ -23,6 +23,7 @@ library
   exposed-modules:
       Assignment
       Instances
+      JSON
       Parser
       Types
   other-modules:

@@ -1,4 +1,4 @@
-module Assignment (markdownParser, convertADTHTML) where
+module Assignment (markdownParser, convertADTHTML, getTime) where
 
 import Control.Applicative
   ( Alternative (many, some, (<|>)),
@@ -112,7 +112,7 @@ pAltText = AltText <$> altTextContent
 pImgURL :: Parser ImgURL
 pImgURL = ImgURL <$> imgURLContent
   where
-    imgURLContent = is '(' *> pBasic `pUntil` is ' ' <* spaces -- validate the no space thing i guess?
+    imgURLContent = is '(' *> pBasic `pUntil` spaces
 
 pCaptionText :: Parser CaptionText
 pCaptionText = CaptionText <$> captionTextContent
@@ -128,7 +128,7 @@ pFootnoteReference = pad $ liftA2 FootnoteReference theReference theContent
 
 -- BLOCK QUOTES
 pQuote :: Parser Block
-pQuote = pad $ Quote <$> (line `sepBy1` is '\n')
+pQuote = pad $ Quote <$> (line `sepBy1` newline)
   where
     line = Line <$> (inlineSpace *> charTok '>' *> many pModText)
 
