@@ -25,6 +25,7 @@ library
       Instances
       JSON
       Parser
+      PrettyBoy
       Types
   other-modules:
       Paths_exercises
