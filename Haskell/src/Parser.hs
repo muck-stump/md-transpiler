@@ -350,12 +350,13 @@ sepBy :: Parser a -> Parser b -> Parser [a]
 sepBy p sep = sepBy1 p sep <|> pure []
 
 trailEnd :: Parser a -> Parser a
-trailEnd = (*>) (many whitespace)
-  where
-    whitespace = oneof " \t\r\n\f\v"
+trailEnd = (*>) spaces
 
 roken :: Parser a -> Parser a
 roken = (*>) inlineSpace
+
+newline :: Parser Char
+newline = is '\n'
 
 ----
 -- utilised parser

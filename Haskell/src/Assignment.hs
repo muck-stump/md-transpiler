@@ -13,7 +13,7 @@ import Data.Time.Format (defaultTimeLocale, formatTime)
 import GHC.IO.Encoding.Types (CodeBuffer)
 import GHC.TypeLits (Mod)
 import Instances (Parser (..))
-import Parser (char, charTok, digit, eof, int, is, isNot, oneof, pBetween, pUntil, roken, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
+import Parser (char, charTok, digit, eof, inlineSpace, int, is, isNot, newline, oneof, pBetween, pUntil, roken, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
 import Types (FreeText)
 
 data Md = Md [Block]
@@ -98,11 +98,11 @@ pModText :: Parser ModText
 pModText = pBold <|> pItalic <|> pStrikeThrough <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
 
 pFreeText :: Parser Block
-pFreeText = FreeText <$> some pModText
+pFreeText = pad $ FreeText <$> some pModText
 
 -- PARSE IMAGES
 pImage :: Parser Block
-pImage = liftA3 Image pAltText pImgURL pCaptionText
+pImage = pad $ liftA3 Image pAltText pImgURL pCaptionText
 
 pAltText :: Parser AltText
 pAltText = AltText <$> altTextContent
@@ -121,20 +121,20 @@ pCaptionText = CaptionText <$> captionTextContent
 
 --- FOOTNOTE REFERENCES
 pFootnoteReference :: Parser Block
-pFootnoteReference = liftA2 FootnoteReference theReference theContent
+pFootnoteReference = pad $ liftA2 FootnoteReference theReference theContent
   where
     theReference = roken $ (string "[^" *> int <* is ']') <* is ':'
     theContent = roken $ many pBasic
 
 -- BLOCK QUOTES
 pQuote :: Parser Block
-pQuote = Quote <$> (line `sepBy1` is '\n')
+pQuote = pad $ Quote <$> (line `sepBy1` is '\n')
   where
     line = Line <$> roken (charTok '>' *> many pModText)
 
 -- CODE BLOCK
 pCode :: Parser Block
-pCode = liftA2 Code language program
+pCode = pad $ liftA2 Code language program
   where
     language = Language <$> (string "```" *> (pBasic `pUntil` is '\n'))
     program = Program <$> (char `pUntil` string "\n```" <|> string "```")
@@ -142,7 +142,7 @@ pCode = liftA2 Code language program
 -- HEADINGS
 
 pHeading :: Parser Block
-pHeading = heading <|> h1alt <|> h2alt
+pHeading = pad $ heading <|> h1alt <|> h2alt
   where
     heading = do
       _ <- spaces
@@ -157,7 +157,19 @@ pHeadingAux :: Int -> Parser a -> Parser Block
 pHeadingAux depth = (Heading depth <$>) . text
   where
     text d = roken $ some pModText <* delimiter d
-    delimiter d = is '\n' <* roken d <* some d
+    delimiter d = is '\n' <* roken d <* some d <* inlineSpace
+
+-- PADDING
+-- before the block is MANY number of whitespaces of any kind
+-- after the block is SOME whitespace (any kind, at least 1 newline) or MANY whitespace then eof
+
+pad :: Parser a -> Parser a
+pad = padBefore . padAfter
+  where
+    padBefore = (*>) spaces
+    padAfter = (<* (midPad <|> lastPad))
+    midPad = inlineSpace *> newline *> inlineSpace
+    lastPad = spaces <* eof
 
 -- BLOCK
 pBlock :: Parser Block
@@ -165,10 +177,7 @@ pBlock = pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFr
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> mdContent
-  where
-    mdContent = trailEnd blocks <* trailEnd eof
-    blocks = pBlock `sepBy` some (is '\n')
+markdownParser = Md <$> (many pBlock)
 
 -- printing classing and typing
 class PrettyBoy p where
