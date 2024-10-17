@@ -137,7 +137,7 @@ pCode :: Parser Block
 pCode = pad $ liftA2 Code language program
   where
     language = Language <$> (string "```" *> (pBasic `pUntil` (inlineSpace *> newline)))
-    program = Program <$> (char `pUntil` (spaces *> string "```"))
+    program = Program <$> (char `pUntil` (newline *> string "```"))
 
 -- HEADINGS
 
