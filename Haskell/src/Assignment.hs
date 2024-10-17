@@ -3,7 +3,7 @@ module Assignment (markdownParser, convertADTHTML) where
 import Control.Applicative
   ( Alternative (many, some, (<|>)),
     Applicative (liftA2),
-    liftA,
+    liftA2,
     liftA3,
   )
 import Control.Monad (guard)
@@ -177,7 +177,7 @@ pBlock = pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFr
 
 -- MARKDOWN
 markdownParser :: Parser Md
-markdownParser = Md <$> (many pBlock)
+markdownParser = Md <$> many pBlock
 
 -- printing classing and typing
 class PrettyBoy p where
@@ -240,8 +240,6 @@ instance PrettyBoy Block where
   unwrapPrint _ (FreeText a) = prettyPrintAux "" a
   unwrapPrint _ (Code _ (Program prog)) = prog
   unwrapPrint _ (Heading _ text) = prettyPrintAux "" text
-
--- unwrapPrint _ _ = ""
 
 -- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
 --   where
