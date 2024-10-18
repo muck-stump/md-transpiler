@@ -1,15 +1,3 @@
-approach  -> parser will try to succeed whenever an alternative interpretation is possible. 
-generally, this means things that throw errors will be interpreted as free text. 
-
-_italic text_
-**bold text**
-~~strikethrough~~
-[link](https://deepneuron.org)
-`inline code`
-test[^1] footnote (no whitespace between ^ and integer)
-
-can i modify a == heading with more #. assuming no
-
 ```BNF
 <mdText> ::= <block> | ''
 <block> ::= <blockContent> '\n' | <block> <block>
@@ -55,3 +43,5 @@ can i modify a == heading with more #. assuming no
 <table> ::=
 <blank> ::= <blank> <blank> | '\n' // to handle lots of entering. might get switched out for tokens.
 ```
+
+headings are notated in a context free way here, though they are done with monads in the program.

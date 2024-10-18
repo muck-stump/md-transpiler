@@ -58,10 +58,10 @@ pInlineCode :: Parser ModText
 pInlineCode = makeModParser InlineCode pBasic (string "`")
 
 pSuperScript :: Parser ModText
-pSuperScript = Super <$> (is '\\' *> pModText `pUntil` is '/')
+pSuperScript = Super <$> (is '\\' *> pModText `pUntil` string "//")
 
 pSub :: Parser ModText
-pSub = Sub <$> (is '/' *> pModText `pUntil` is '\\')
+pSub = Sub <$> (string "//" *> pModText `pUntil` is '\\')
 
 pLink :: Parser ModText
 pLink = Link <$> linkTuple
@@ -168,7 +168,7 @@ dash :: Parser Char
 dash = charTok '-'
 
 pTable :: Parser Block
-pTable = do
+pTable = pad $ do
   headRow <- pHeadRow
   let width = headLength headRow
   _ <- pSeparator width
@@ -177,20 +177,7 @@ pTable = do
   where
     headLength (Head (HeadRow lst)) = length lst
 
--- parse a first row -> list
--- parse a separator (at least 3 '-' in each section) (right length)
--- parse many filler rows (right length)
-
 -- LIST
--- pList :: Parser Block
--- pList =
--- detect a first line
---  -- detect a '1' and then a '.'
---  -- detect some inline spaces
---  -- detect some mod text
---  -- detect one newline
--- detect a n line or detect a sublist
--- sublist is detect a fist line, then detect many nlines
 
 pItemPred :: (Int -> Bool) -> Parser [ModText]
 pItemPred predicate = do
