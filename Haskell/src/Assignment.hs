@@ -193,15 +193,15 @@ pBlock :: Parser Block
 pBlock = pTable <|> pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
-markdownParser :: Parser Html
-markdownParser = Html "title" <$> (Md <$> many pBlock)
+markdownParser :: Parser Md
+markdownParser = Md <$> many pBlock
 
 getTime :: IO String
 getTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S" <$> getCurrentTime
 
-convertADTHTML :: Html -> String
-convertADTHTML (Html t m) = header ++ prettyPrint delim m ++ footer
+convertADTHTML :: String -> Md -> String
+convertADTHTML title md = header ++ prettyPrint "\n" md ++ footer
   where
-    header = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>" ++ t ++ "</title>" ++ delim ++ "</head>" ++ delim ++ delim
+    header = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>" ++ title ++ "</title>" ++ delim ++ "</head>" ++ delim ++ delim
     delim = "\n"
     footer = delim ++ delim ++ "</html>" ++ delim

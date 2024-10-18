@@ -36,6 +36,11 @@ jsonResponse pairs =
 -- writeFile "the path" "the contents"
 -- getTime >>= (\s -> writeFile (s ++ ".html") "The content")
 
+makeTitle :: String -> IO String
+makeTitle title = do
+  time <- getTime
+  return (title ++ "_" ++ time ++ ".html")
+
 main :: IO ()
 main = scotty 3000 $ do
   post "/api/convertMD" $ do
@@ -55,8 +60,8 @@ main = scotty 3000 $ do
         -- decode str into save and content
         -- markdownParser gets run with content
         -- Parse the Markdown string using 'markdownParser' and apply 'convertAllHTML'
-        converted_html = getResult (parse markdownParser content) convertADTHTML
-    when save $ liftIO $ getTime >>= (`writeFile` converted_html) . (++ ".html")
+        converted_html = getResult (parse markdownParser content) (convertADTHTML title)
+    when save $ liftIO $ makeTitle title >>= (`writeFile` converted_html)
 
     -- Respond with the converted HTML as JSON
     jsonResponse [("html", converted_html)]
