@@ -15,13 +15,15 @@ import Types
     HeadCell (..),
     HeadRow (..),
     ImgURL (ImgURL),
+    Item (Item),
+    ItemContent (ItemContent),
     Language (Language),
     Line (..),
-    ListItem (..),
     ModText (..),
     Program (Program),
     Row (..),
     SubItem (SubItem),
+    SubList (SubList),
     Title (..),
   )
 
@@ -117,26 +119,52 @@ instance PrettyBoy Block where
 --   where
 --     sep = d ++ "    "
 
-instance PrettyBoy ListItem where
-  preText :: String -> ListItem -> String
-  preText _ (Item _) = "<li>"
-  preText _ (SubList _) = "<ol>"
+instance PrettyBoy Item where
+  preText :: String -> Item -> String
+  preText _ (Item _ _) = "<li>"
 
-  postText :: String -> ListItem -> String
-  postText _ (Item _) = "</li>"
-  postText _ (SubList _) = "</ol>"
+  postText :: String -> Item -> String
+  postText _ (Item _ _) = "</li>"
 
-  unwrapPrint :: String -> ListItem -> String
-  unwrapPrint _ (Item a) = prettyPrintAux "" a
-  unwrapPrint d a = prettyPrint (d ++ "    ") a
+  unwrapPrint :: String -> Item -> String
+  unwrapPrint d (Item a (SubList [])) = prettyPrint (d ++ "    ") a
+  unwrapPrint d (Item a l) =
+    prettyPrint sep a
+      ++ sep
+      ++ prettyPrint sep l
+      ++ d
+    where
+      sep = d ++ "    "
+
+instance PrettyBoy ItemContent where
+  preText :: String -> ItemContent -> String
+  preText _ _ = ""
+
+  postText :: String -> ItemContent -> String
+  postText _ _ = ""
+
+  unwrapPrint :: String -> ItemContent -> String
+  unwrapPrint _ (ItemContent a) = prettyPrintAux "" a
+
+instance PrettyBoy SubList where
+  preText :: String -> SubList -> String
+  preText _ _ = "<ol>"
+
+  postText :: String -> SubList -> String
+  postText _ _ = "</ol>"
+
+  unwrapPrint :: String -> SubList -> String
+  unwrapPrint d (SubList a) = (d ++ "    ") ++ prettyPrintAux (d ++ "    ") a ++ d
 
 instance PrettyBoy SubItem where
   preText :: String -> SubItem -> String
   preText _ _ = "<li>"
+
   postText :: String -> SubItem -> String
   postText _ _ = "</li>"
+
   unwrapPrint :: String -> SubItem -> String
-  unwrapPrint _ = prettyPrint ""
+  unwrapPrint _ (SubItem a) = prettyPrintAux "" a
 
 instance PrettyBoy Cell where
   preText :: String -> Cell -> String

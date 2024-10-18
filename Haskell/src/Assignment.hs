@@ -25,13 +25,15 @@ import Types
     HeadCell (..),
     HeadRow (..),
     ImgURL (..),
+    Item (Item),
+    ItemContent (ItemContent),
     Language (Language),
     Line (..),
-    ListItem (..),
     ModText (..),
     Program (Program),
     Row (..),
     SubItem (SubItem),
+    SubList (SubList),
     Title (Title),
   )
 
@@ -200,13 +202,26 @@ pRawFirstItem :: Parser [ModText]
 pRawFirstItem = pItemPred (== 1)
 
 pRawRestItem :: Parser [ModText]
-pRawRestItem = newline *> pItemPred (> 0)
+pRawRestItem = pItemPred (> 0)
 
-pSubList :: Parser ListItem
-pSubList = SubList <$> liftA2 (:) firstSubItem (many restSubItem)
+pFirstItem :: Parser Item
+pFirstItem = liftA2 Item content pSubList
   where
-    firstSubItem = SubItem <$> (ensureSub *> pRawFirstItem)
-    restSubItem = SubItem <$> (ensureSub *> pRawRestItem)
+    content = ItemContent <$> pRawFirstItem
+
+pRestItem :: Parser Item
+pRestItem = liftA2 Item content pSubList
+  where
+    content = ItemContent <$> (newline *> pRawRestItem)
+
+pSubList1 :: Parser [SubItem]
+pSubList1 = liftA2 (:) firstSubItem (many restSubItem)
+  where
+    firstSubItem = SubItem <$> (newline *> ensureSub *> pRawFirstItem)
+    restSubItem = SubItem <$> (newline *> ensureSub *> pRawRestItem)
+
+pSubList :: Parser SubList
+pSubList = SubList <$> (pSubList1 <|> pure [])
 
 ensureSub :: Parser ()
 ensureSub = do
@@ -214,16 +229,10 @@ ensureSub = do
   _ <- guard (spc == 4)
   return ()
 
-pFirstItem :: Parser ListItem
-pFirstItem = Item <$> pRawFirstItem
-
-pRestItem :: Parser ListItem
-pRestItem = Item <$> pRawRestItem
-
 pList :: Parser Block
 pList = pad $ do
   one <- pFirstItem
-  rest <- many $ pRestItem <|> pSubList
+  rest <- many pRestItem
   return $ List $ one : rest
 
 -- PADDING
