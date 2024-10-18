@@ -49,6 +49,8 @@ data ModText
   = Bold [ModText]
   | Italic [ModText]
   | StrikeThrough [ModText]
+  | Super [ModText]
+  | Sub [ModText]
   | InlineCode String
   | Untouched Char
   | Link (String, String)

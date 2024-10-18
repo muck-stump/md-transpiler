@@ -24,6 +24,10 @@ unwrapJSON :: ParseResult JsonValue -> JsonValue
 unwrapJSON (Result _ a) = a
 unwrapJSON _ = JNull
 
+stringToBool :: String -> Bool
+stringToBool "true" = True
+stringToBool _ = False
+
 -- Magic code to convert key, value pairs to JSON to send back to the server
 jsonResponse :: [(String, String)] -> ActionM ()
 jsonResponse pairs =
@@ -39,10 +43,15 @@ main = scotty 3000 $ do
     -- Convert the raw request body from ByteString to Text
     let requestBodyText = decodeUtf8 requestBody
         -- Convert the Text to String
-        str = unpack requestBodyText
-        wrappedObj = unwrapJSON (parse thisJson str)
-        content = getString $ getKey "content" wrappedObj -- content of markdown file
-        save = getBool $ getKey "save" wrappedObj -- whether the file should be saved
+        str = lines $ unpack requestBodyText
+        -- str = unpack requestBodyText
+        save = stringToBool $ str !! 0
+        title = str !! 1
+        content = unlines $ drop 2 str
+        -- jObject = unwrapJSON (parse thisJson str)
+        -- content = getString $ getKey "markdown" jObject -- content of markdown file
+        -- save = getBool $ getKey "save" jObject -- whether the file should be saved
+        -- title = getString $ getKey "title" jObject
         -- decode str into save and content
         -- markdownParser gets run with content
         -- Parse the Markdown string using 'markdownParser' and apply 'convertAllHTML'

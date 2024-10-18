@@ -20,6 +20,7 @@ const markdownInput = document.getElementById(
 ) as HTMLTextAreaElement;
 const checkbox = document.querySelector('input[name="checkbox"]')!;
 const saver = document.getElementById("save-button")!;
+const title = document.getElementById("title")!;
 
 type Action = (_: State) => State;
 
@@ -27,7 +28,6 @@ const resetState: Action = (s) => {
     return { ...s, save: false};
 };
 
-// i take the reset button from monte carlo and i put it in the thing
 
 const compose =
     <T, U>(g: (_: T) => U) =>
@@ -49,9 +49,14 @@ const checkboxStream$: Observable<Action> = fromEvent(checkbox, "change").pipe(
     map((value) => (s) => ({ ...s, renderHTML: value})),
 );
 
-const $save: Observable<Action> = fromEvent(saver, "click").pipe(
-    map(event => ( (s:State) => ({...s, save: true}))
+const save$: Observable<Action> = fromEvent(saver, "click").pipe(
+    map( _ => ( (s:State) => ({...s, save: true}))
 ))
+
+const title$: Observable<Action> = fromEvent(title, "input").pipe(
+    map((event) => (event.target as HTMLInputElement).value ),
+    map( title => ( (s:State) => ({...s, title: title }) ))
+)
 
 function getHTML(s: State): Observable<State> {
     // Get the HTML as a stream
@@ -61,10 +66,9 @@ function getHTML(s: State): Observable<State> {
         headers: {
             "Content-Type": "application/x-www-form-urlencoded",
         },
-        body: `{ 
-            "save": ${s.save}, 
-            "content": "${s.markdown}"
-        }`, // simple json object in the same format as the JSON parser
+        body: s.save + "\n" + s.title + "\n" + s.markdown
+        // `{"save":${s.save},"markdown" : "${s.markdown}","title":"${s.title}"}`
+        // JSON.stringify({save: s.save, markdown: `\"${s.markdown}\"`, title: s.title})
     }).pipe(
         map((response) => response.response), // Extracting the response data
         map((data) => {
@@ -77,6 +81,8 @@ function getHTML(s: State): Observable<State> {
     );
 }
 
+// `{"save":${s.save},"markdown" : "${s.markdown}","title":"a"}`
+
 // i give more info to body (not just s.markwon) s.markdown so it knows if i hit save
 
 const initialState: State = {
@@ -84,15 +90,16 @@ const initialState: State = {
     HTML: "",
     renderHTML: true,
     save: false,
+    title: "",
 };
 
-const refreshers$ = merge(input$, checkboxStream$).pipe(
+const refreshers$ = merge(input$, checkboxStream$, title$).pipe(
     map((reducer: Action) => compose(reducer)(resetState))
 )
 
 function main() {
     // Subscribe to the input Observable to listen for changes
-    const subscription = merge(refreshers$, $save)
+    const subscription = merge(refreshers$, save$)
         .pipe(
             mergeScan((acc: State, reducer: Action) => {
                 const newState = reducer(acc);

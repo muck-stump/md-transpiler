@@ -7,11 +7,8 @@ import Control.Applicative
     liftA3,
   )
 import Control.Monad (guard, replicateM, void)
-import Data.List (intercalate)
 import Data.Time.Clock (getCurrentTime)
 import Data.Time.Format (defaultTimeLocale, formatTime)
-import GHC.IO.Encoding.Types (CodeBuffer)
-import GHC.TypeLits (Mod)
 import Instances (Parser (..))
 import Parser (char, charTok, digit, eof, inlineSpace, int, is, isNot, newline, oneof, pBetween, pUntil, roken, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
 import PrettyBoy (PrettyBoy (prettyPrint))
@@ -28,7 +25,7 @@ import Types
     ImgURL (..),
     Language (Language),
     Line (..),
-    Md (..),
+    Md (..), -- Introducing the star of our show, his name is **marshal**
     ModText (..),
     Program (Program),
     Row (..),
@@ -38,7 +35,7 @@ import Types
 pBasic :: Parser Char
 pBasic = isNot '\n'
 
--- PARSE FREETEXT
+-- PARSE FREE TEXT
 makeModParser :: ([a] -> ModText) -> Parser a -> Parser b -> Parser ModText
 makeModParser f p1 p2 = f <$> p1 `pBetween` p2
 
@@ -54,6 +51,12 @@ pStrikeThrough = makeModParser StrikeThrough pModText (string "~~")
 pInlineCode :: Parser ModText
 pInlineCode = makeModParser InlineCode pBasic (string "`")
 
+pSuperScript :: Parser ModText
+pSuperScript = Super <$> (is '\\' *> pModText `pUntil` is '/')
+
+pSub :: Parser ModText
+pSub = Sub <$> (is '/' *> pModText `pUntil` is '\\')
+
 pLink :: Parser ModText
 pLink = Link <$> linkTuple
   where
@@ -68,7 +71,7 @@ pUntouched :: Parser ModText
 pUntouched = Untouched <$> pBasic
 
 pModText :: Parser ModText
-pModText = pBold <|> pItalic <|> pStrikeThrough <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
+pModText = pBold <|> pItalic <|> pStrikeThrough <|> pSuperScript <|> pSub <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
 
 pFreeText :: Parser Block
 pFreeText = pad $ FreeText <$> some pModText
@@ -173,7 +176,7 @@ pTable = do
 -- parse many filler rows (right length)
 
 -- PADDING
--- before the block is MANY number of whitespaces of any kind
+-- before the block is MANY number of white spaces of any kind
 -- after the block is SOME whitespace (any kind, at least 1 newline) or MANY whitespace then eof
 
 pad :: Parser a -> Parser a

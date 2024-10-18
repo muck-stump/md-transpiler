@@ -3,4 +3,5 @@ export type State = Readonly<{
     HTML: string;
     renderHTML: boolean;
     save: boolean;
+    title: string;
 }>;

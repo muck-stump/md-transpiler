@@ -179,6 +179,8 @@ instance PrettyBoy ModText where
   preText _ (Untouched _) = ""
   preText _ (Link _) = "<a href=\""
   preText _ (Footnote _) = "<sup>"
+  preText _ (Super _) = "<sup>"
+  preText _ (Sub _) = "<sub>"
 
   postText :: String -> ModText -> String
   postText _ (Bold _) = "</strong>"
@@ -188,14 +190,21 @@ instance PrettyBoy ModText where
   postText _ (Untouched _) = ""
   postText _ (Link _) = "</a>"
   postText _ (Footnote _) = "</sup>"
+  postText _ (Super _) = "</sup>"
+  postText _ (Sub _) = "</sub>"
 
   unwrapPrint :: String -> ModText -> String
   unwrapPrint _ (Bold a) = prettyPrintAux "" a
   unwrapPrint _ (Italic a) = prettyPrintAux "" a
   unwrapPrint _ (StrikeThrough a) = prettyPrintAux "" a
+  unwrapPrint _ (Super a) = prettyPrintAux "" a
+  unwrapPrint _ (Sub a) = prettyPrintAux "" a
   unwrapPrint _ (InlineCode a) = a
   unwrapPrint _ (Untouched a) = [a]
   unwrapPrint _ (Link a) = snd a ++ "\">" ++ fst a
   unwrapPrint _ (Footnote a) = "<a id=\"fn" ++ n ++ "ref\" href=\"#fn" ++ n ++ "\">" ++ n ++ "</a>"
     where
       n = show a
+
+-- "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim
+-- "<body>" ++ delim ++ "    "
