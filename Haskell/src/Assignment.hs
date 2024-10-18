@@ -19,7 +19,6 @@ import Types
     Body (..),
     CaptionText (..),
     Cell (..),
-    CodeLine (..),
     Content (Content),
     Head (..),
     HeadCell (..),

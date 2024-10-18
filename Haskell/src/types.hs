@@ -58,9 +58,6 @@ data Language = Language String
 data Program = Program String
   deriving (Show, Eq)
 
-data CodeLine = CodeLine String
-  deriving (Show, Eq)
-
 data Line = Line [ModText]
   deriving (Show, Eq)
 

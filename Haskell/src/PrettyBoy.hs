@@ -9,7 +9,6 @@ import Types
     Body (..),
     CaptionText (CaptionText),
     Cell (..),
-    CodeLine (..),
     Content (..),
     Head (..),
     HeadCell (..),
@@ -223,10 +222,6 @@ instance PrettyBoy Row where
   unwrapPrint d (Row a) = sep ++ prettyPrintAux sep a ++ d
     where
       sep = d ++ "    "
-
-instance PrettyBoy CodeLine where
-  unwrapPrint :: String -> CodeLine -> String
-  unwrapPrint _ (CodeLine str) = str
 
 instance PrettyBoy Line where
   preText :: String -> Line -> String
