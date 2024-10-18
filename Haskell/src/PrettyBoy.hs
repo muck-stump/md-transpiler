@@ -47,10 +47,10 @@ class PrettyBoy p where
 
 instance PrettyBoy Md where
   preText :: String -> Md -> String
-  preText delim _ = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim ++ "<body>" ++ delim ++ "    "
+  preText delim _ = "<body>" ++ delim ++ "    "
 
   postText :: String -> Md -> String
-  postText delim _ = "</body>" ++ delim ++ delim ++ "</html>" ++ delim
+  postText delim _ = "</body>"
 
   unwrapPrint :: String -> Md -> String
   unwrapPrint d (Md a) = prettyPrintAux (d ++ "    ") a ++ d
@@ -208,3 +208,4 @@ instance PrettyBoy ModText where
 
 -- "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>Test</title>" ++ delim ++ "</head>" ++ delim ++ delim
 -- "<body>" ++ delim ++ "    "
+-- ++ delim ++ delim ++ "</html>" ++ delim

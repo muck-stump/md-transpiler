@@ -1,0 +1,13 @@
+diff --git a/examples/expected_output/code.html b/examples/output/code.html
+index 57fbd64..f598036 100644
+--- a/examples/expected_output/code.html
++++ b/examples/output/code.html
+@@ -3,7 +3,7 @@
+ 
+ <head>
+     <meta charset="UTF-8">
+-    <title>Test</title>
++    <title>title</title>
+ </head>
+ 
+ <body>

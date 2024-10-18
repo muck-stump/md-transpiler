@@ -1,0 +1,13 @@
+diff --git a/examples/expected_output/blockquotes.html b/examples/output/blockquotes.html
+index 02666f2..d13f43a 100644
+--- a/examples/expected_output/blockquotes.html
++++ b/examples/output/blockquotes.html
+@@ -3,7 +3,7 @@
+ 
+ <head>
+     <meta charset="UTF-8">
+-    <title>Test</title>
++    <title>title</title>
+ </head>
+ 
+ <body>

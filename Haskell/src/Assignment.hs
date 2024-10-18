@@ -22,10 +22,11 @@ import Types
     Head (..),
     HeadCell (..),
     HeadRow (..),
+    Html (..),
     ImgURL (..),
     Language (Language),
     Line (..),
-    Md (..), -- Introducing the star of our show, his name is **marshal**
+    Md (..),
     ModText (..),
     Program (Program),
     Row (..),
@@ -192,11 +193,15 @@ pBlock :: Parser Block
 pBlock = pTable <|> pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
-markdownParser :: Parser Md
-markdownParser = Md <$> many pBlock
+markdownParser :: Parser Html
+markdownParser = Html "title" <$> (Md <$> many pBlock)
 
 getTime :: IO String
 getTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S" <$> getCurrentTime
 
-convertADTHTML :: Md -> String
-convertADTHTML = prettyPrint "\n"
+convertADTHTML :: Html -> String
+convertADTHTML (Html t m) = header ++ prettyPrint delim m ++ footer
+  where
+    header = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>" ++ t ++ "</title>" ++ delim ++ "</head>" ++ delim ++ delim
+    delim = "\n"
+    footer = delim ++ delim ++ "</html>" ++ delim

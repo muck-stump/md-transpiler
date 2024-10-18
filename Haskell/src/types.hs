@@ -1,5 +1,8 @@
 module Types where
 
+data Html = Html String Md
+  deriving (Show, Eq)
+
 data Md = Md [Block]
   -- Your ADT **must** derive Show.
   deriving (Show, Eq)

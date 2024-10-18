@@ -1,8 +1,13 @@
 diff --git a/examples/expected_output/ordered_list.html b/examples/output/ordered_list.html
-index 54025dc..07386c7 100644
+index 54025dc..202eb67 100644
 --- a/examples/expected_output/ordered_list.html
 +++ b/examples/output/ordered_list.html
-@@ -7,17 +7,13 @@
+@@ -3,21 +3,17 @@
+ 
+ <head>
+     <meta charset="UTF-8">
+-    <title>Test</title>
++    <title>title</title>
  </head>
  
  <body>
