@@ -30,12 +30,7 @@ An alternative approach I considered was setting `ADT` as an instance of functor
 
 # IO handling
 
-I add html elements: an title input box and a save button. Each HTML element is connected to an observable which emits a signal every time said element is interacted with. I process the signals into `Actions`, and merge them. I separate the `reset` Action to happen before any signal, to prevent double triggering
-
-- i define functions for handling titles, as well as functions for unwrapping and updating titles in ADT objects
-- I made some small unwrapping functions, they are all in main, separated away
-- I could have instanced my ADT as a functor and applicative but that would be more work, better implemented in a much more sophisticated parser.
-
+I add html elements: an title input box and a save button. Each HTML element is connected to an observable which emits a signal every time said element is interacted with. I process the signals into `Actions`, and merge them. I compose the `reset` action to happen before any other action, ensuring clean States each time. I modify the API request to contain (a) whether to save the file (b) the title and (c) the markdown content. I perform elementary pre-parsing of the signal in `main.hs`, and perform actions (updating titles, saving files), in accordance with the signal received.
 
 # Nested Text Modifiers
 

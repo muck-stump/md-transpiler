@@ -18,6 +18,15 @@ data Block
   | Code Language Program
   | Heading Int [ModText]
   | Table Head Body
+  | List [ListItem]
+  deriving (Show, Eq)
+
+data ListItem
+  = Item [ModText]
+  | SubList [SubItem]
+  deriving (Show, Eq)
+
+data SubItem = SubItem [ModText]
   deriving (Show, Eq)
 
 data Head = Head HeadRow

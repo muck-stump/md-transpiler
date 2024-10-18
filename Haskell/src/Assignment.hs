@@ -27,9 +27,11 @@ import Types
     ImgURL (..),
     Language (Language),
     Line (..),
+    ListItem (..),
     ModText (..),
     Program (Program),
     Row (..),
+    SubItem (SubItem),
     Title (Title),
   )
 
@@ -178,7 +180,8 @@ pTable = do
 -- parse many filler rows (right length)
 
 -- LIST
-
+-- pList :: Parser Block
+-- pList =
 -- detect a first line
 --  -- detect a '1' and then a '.'
 --  -- detect some inline spaces
@@ -186,6 +189,42 @@ pTable = do
 --  -- detect one newline
 -- detect a n line or detect a sublist
 -- sublist is detect a fist line, then detect many nlines
+
+pItemPred :: (Int -> Bool) -> Parser [ModText]
+pItemPred predicate = do
+  num <- int <* string ". " <* inlineSpace
+  _ <- guard $ predicate num
+  many pModText
+
+pRawFirstItem :: Parser [ModText]
+pRawFirstItem = pItemPred (== 1)
+
+pRawRestItem :: Parser [ModText]
+pRawRestItem = newline *> pItemPred (> 0)
+
+pSubList :: Parser ListItem
+pSubList = SubList <$> liftA2 (:) firstSubItem (many restSubItem)
+  where
+    firstSubItem = SubItem <$> (ensureSub *> pRawFirstItem)
+    restSubItem = SubItem <$> (ensureSub *> pRawRestItem)
+
+ensureSub :: Parser ()
+ensureSub = do
+  spc <- length <$> inlineSpace
+  _ <- guard (spc == 4)
+  return ()
+
+pFirstItem :: Parser ListItem
+pFirstItem = Item <$> pRawFirstItem
+
+pRestItem :: Parser ListItem
+pRestItem = Item <$> pRawRestItem
+
+pList :: Parser Block
+pList = pad $ do
+  one <- pFirstItem
+  rest <- many $ pRestItem <|> pSubList
+  return $ List $ one : rest
 
 -- PADDING
 -- before the block is MANY number of white spaces of any kind
@@ -201,7 +240,7 @@ pad = padBefore . padAfter
 
 -- BLOCK
 pBlock :: Parser Block
-pBlock = pTable <|> pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
+pBlock = pList <|> pTable <|> pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
 markdownParser :: Parser ADT

@@ -1,29 +1,19 @@
 diff --git a/examples/expected_output/ordered_list.html b/examples/output/ordered_list.html
-index 54025dc..07386c7 100644
+index 54025dc..4a238da 100644
 --- a/examples/expected_output/ordered_list.html
 +++ b/examples/output/ordered_list.html
-@@ -7,17 +7,13 @@
- </head>
- 
+@@ -9,11 +9,9 @@
  <body>
--    <ol>
--        <li>Item 1</li>
+     <ol>
+         <li>Item 1</li>
 -        <ol>
 -            <li>Sub Item 1</li>
 -            <li>Sub Item 2</li>
 -            <li>Sub Item 3</li>
 -        </ol>
--        <li><strong>Bolded Item 2</strong></li>
--        <li>Item 3</li>
--        <li>Item 4</li>
--    </ol>
-+    <p>1. Item 1</p>
-+    <p>1. Sub Item 1</p>
-+    <p>2. Sub Item 2</p>
-+    <p>3. Sub Item 3</p>
-+    <p>2. <strong>Bolded Item 2</strong></p>
-+    <p>6. Item 3</p>
-+    <p>7. Item 4</p>
- </body>
- 
- </html>
++        <li>Sub Item 1</li>
++        <li>Sub Item 2</li>
++        <li>Sub Item 3</li>
+         <li><strong>Bolded Item 2</strong></li>
+         <li>Item 3</li>
+         <li>Item 4</li>

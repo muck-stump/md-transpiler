@@ -17,9 +17,11 @@ import Types
     ImgURL (ImgURL),
     Language (Language),
     Line (..),
+    ListItem (..),
     ModText (..),
     Program (Program),
     Row (..),
+    SubItem (SubItem),
     Title (..),
   )
 
@@ -62,7 +64,7 @@ instance PrettyBoy Content where
   preText delim _ = "<body>" ++ delim ++ "    "
 
   postText :: String -> Content -> String
-  postText delim _ = "</body>"
+  postText _ _ = "</body>"
 
   unwrapPrint :: String -> Content -> String
   unwrapPrint d (Content a) = prettyPrintAux (d ++ "    ") a ++ d
@@ -76,6 +78,7 @@ instance PrettyBoy Block where
   preText _ (Code (Language lang) _) = "<pre><code class=\"language-" ++ lang ++ "\">"
   preText _ (Heading depth _) = "<h" ++ show depth ++ ">"
   preText _ (Table {}) = "<table>"
+  preText _ (List {}) = "<ol>"
   preText _ _ = "<p>"
 
   postText :: String -> Block -> String
@@ -84,10 +87,14 @@ instance PrettyBoy Block where
   postText _ (Code {}) = "</code></pre>"
   postText _ (Heading depth _) = "</h" ++ show depth ++ ">"
   postText _ (Table {}) = "</table>"
+  postText _ (List {}) = "</ol>"
   postText _ _ = "</p>"
 
   unwrapPrint :: String -> Block -> String
   unwrapPrint d (Quote a) = prettyPrintAux sep a ++ d
+    where
+      sep = d ++ "    "
+  unwrapPrint d (List a) = sep ++ prettyPrintAux sep a ++ d
     where
       sep = d ++ "    "
   unwrapPrint d (Table hd bd) =
@@ -109,6 +116,27 @@ instance PrettyBoy Block where
 -- unwrapPrint d (FreeText a) = sep ++ prettyPrintAux "" a ++ d
 --   where
 --     sep = d ++ "    "
+
+instance PrettyBoy ListItem where
+  preText :: String -> ListItem -> String
+  preText _ (Item _) = "<li>"
+  preText _ (SubList _) = "<ol>"
+
+  postText :: String -> ListItem -> String
+  postText _ (Item _) = "</li>"
+  postText _ (SubList _) = "</ol>"
+
+  unwrapPrint :: String -> ListItem -> String
+  unwrapPrint _ (Item a) = prettyPrintAux "" a
+  unwrapPrint d a = prettyPrint (d ++ "    ") a
+
+instance PrettyBoy SubItem where
+  preText :: String -> SubItem -> String
+  preText _ _ = "<li>"
+  postText :: String -> SubItem -> String
+  postText _ _ = "</li>"
+  unwrapPrint :: String -> SubItem -> String
+  unwrapPrint _ = prettyPrint ""
 
 instance PrettyBoy Cell where
   preText :: String -> Cell -> String
