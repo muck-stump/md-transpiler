@@ -93,14 +93,12 @@ const initialState: State = {
     title: "",
 };
 
-const refreshers$ = merge(input$, checkboxStream$, title$).pipe(
-    map((reducer: Action) => compose(reducer)(resetState))
-)
 
 function main() {
     // Subscribe to the input Observable to listen for changes
-    const subscription = merge(refreshers$, save$)
+    const subscription = merge(input$, checkboxStream$, title$, save$)
         .pipe(
+            map((reducer: Action) => compose(resetState)(reducer)),
             mergeScan((acc: State, reducer: Action) => {
                 const newState = reducer(acc);
                 // getHTML returns an observable of length one

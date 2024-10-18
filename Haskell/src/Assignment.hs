@@ -13,23 +13,24 @@ import Instances (Parser (..))
 import Parser (char, charTok, digit, eof, inlineSpace, int, is, isNot, newline, oneof, pBetween, pUntil, roken, sepBy, sepBy1, space, spaces, spaces1, string, trailEnd)
 import PrettyBoy (PrettyBoy (prettyPrint))
 import Types
-  ( AltText (..),
+  ( ADT (..),
+    AltText (..),
     Block (..),
     Body (..),
     CaptionText (..),
     Cell (..),
     CodeLine (..),
+    Content (Content),
     Head (..),
     HeadCell (..),
     HeadRow (..),
-    Html (..),
     ImgURL (..),
     Language (Language),
     Line (..),
-    Md (..),
     ModText (..),
     Program (Program),
     Row (..),
+    Title (Title),
   )
 
 -- stuff?
@@ -176,6 +177,16 @@ pTable = do
 -- parse a separator (at least 3 '-' in each section) (right length)
 -- parse many filler rows (right length)
 
+-- LIST
+
+-- detect a first line
+--  -- detect a '1' and then a '.'
+--  -- detect some inline spaces
+--  -- detect some mod text
+--  -- detect one newline
+-- detect a n line or detect a sublist
+-- sublist is detect a fist line, then detect many nlines
+
 -- PADDING
 -- before the block is MANY number of white spaces of any kind
 -- after the block is SOME whitespace (any kind, at least 1 newline) or MANY whitespace then eof
@@ -193,15 +204,16 @@ pBlock :: Parser Block
 pBlock = pTable <|> pHeading <|> pCode <|> pQuote <|> pFootnoteReference <|> pImage <|> pFreeText
 
 -- MARKDOWN
-markdownParser :: Parser Md
-markdownParser = Md <$> many pBlock
+markdownParser :: Parser ADT
+markdownParser = ADT (Title "Test") . Content <$> many pBlock
 
 getTime :: IO String
 getTime = formatTime defaultTimeLocale "%Y-%m-%dT%H:%M:%S" <$> getCurrentTime
 
-convertADTHTML :: String -> Md -> String
-convertADTHTML title md = header ++ prettyPrint "\n" md ++ footer
-  where
-    header = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>" ++ title ++ "</title>" ++ delim ++ "</head>" ++ delim ++ delim
-    delim = "\n"
-    footer = delim ++ delim ++ "</html>" ++ delim
+convertADTHTML :: ADT -> String
+convertADTHTML = prettyPrint "\n"
+
+-- where
+-- header = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>" ++ "title" ++ "</title>" ++ delim ++ "</head>" ++ delim ++ delim
+-- delim = "\n"
+-- footer = delim ++ delim ++ "</html>" ++ delim

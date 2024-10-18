@@ -1,6 +1,6 @@
 # Design
 
-Simple data types for basic markdown objects are created and composed into the Algebraic Data Type `Md`.
+Simple data types for basic markdown objects are created and composed into `ADT`.
 Parsing is done by creating parsers for basic data types, composed into the `markdownParser`. 
 Printing to `html` is done by creating a type class `PrettyBoy` with a method `prettyPrint`. 
 Markdown data types are instances of `PrettyBoy`, with `prettyPrint` defined accordingly.
@@ -25,6 +25,17 @@ Thus, code is incredibly flexible:
 - Changing default indentation can be done by passing different delimiters to `prettyPrint`. e.g. passing `"\n\t"` produces an extra indentation through out the whole html doc.
 - Changing specific print features is easy, by changing the `unwrapPrint` function of the specific type you want to change.
 - Adding new features is easy, by creating a new type instance of `PrettyBoy`, defining a parser for that type (and composing with `markdownParser`), and defining `unwrapPrint`. Barely any code needs to be changed to add features.
+
+An alternative approach I considered was setting `ADT` as an instance of functor, applicative, and monad, then defining small printing functions and composing them into the `convertADTHTML` function. This method would require much more abstraction and set up, and be even more modular than my current setup. I decided to go with my method because it was more concrete and specialised to the current problem at hand, allowing me to develop solutions to the specific task.
+
+# IO handling
+
+I add html elements: an title input box and a save button. Each HTML element is connected to an observable which emits a signal every time said element is interacted with. I process the signals into `Actions`, and merge them. I separate the `reset` Action to happen before any signal, to prevent double triggering
+
+- i define functions for handling titles, as well as functions for unwrapping and updating titles in ADT objects
+- I made some small unwrapping functions, they are all in main, separated away
+- I could have instanced my ADT as a functor and applicative but that would be more work, better implemented in a much more sophisticated parser.
+
 
 # Nested Text Modifiers
 

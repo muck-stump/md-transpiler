@@ -1,13 +1,8 @@
 diff --git a/examples/expected_output/footnotes.html b/examples/output/footnotes.html
-index 2a5009f..b1dc0a6 100644
+index 2a5009f..330c5d5 100644
 --- a/examples/expected_output/footnotes.html
 +++ b/examples/output/footnotes.html
-@@ -3,13 +3,13 @@
- 
- <head>
-     <meta charset="UTF-8">
--    <title>Test</title>
-+    <title>title</title>
+@@ -7,9 +7,9 @@
  </head>
  
  <body>

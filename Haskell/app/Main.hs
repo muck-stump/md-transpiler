@@ -14,11 +14,15 @@ import Data.Text.Lazy (Text, pack, unpack)
 import Data.Text.Lazy.Encoding (decodeUtf8)
 import Instances (ParseResult (Result), parse)
 import JSON
+import Types (ADT (ADT), Title (Title))
 import Web.Scotty (ActionM, body, json, post, scotty)
 
 getResult :: ParseResult a -> (a -> String) -> String
 getResult (Result _ a) f = f a
 getResult _ _ = ""
+
+titledAdt :: ADT -> String -> ADT
+titledAdt (ADT _ c) title = ADT (Title title) c
 
 unwrapJSON :: ParseResult JsonValue -> JsonValue
 unwrapJSON (Result _ a) = a
@@ -45,6 +49,9 @@ safeTitle :: String -> String
 safeTitle "" = "Test"
 safeTitle t = t
 
+updateTitle :: String -> ADT -> ADT
+updateTitle t (ADT _ c) = ADT (Title t) c
+
 main :: IO ()
 main = scotty 3000 $ do
   post "/api/convertMD" $ do
@@ -58,8 +65,12 @@ main = scotty 3000 $ do
         content = unlines $ drop 2 str
         -- markdownParser gets run with content
         -- Parse the Markdown string using 'markdownParser' and apply 'convertAllHTML'
-        converted_html = getResult (parse markdownParser content) (convertADTHTML title)
+        adt = parse markdownParser content
+        converted_html = getResult adt (convertADTHTML . updateTitle title)
     when save $ liftIO $ makeTitle title >>= (`writeFile` converted_html)
 
     -- Respond with the converted HTML as JSON
     jsonResponse [("html", converted_html)]
+
+-- getresult adt
+-- change adt to titled adt first

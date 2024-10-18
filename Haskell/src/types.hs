@@ -1,10 +1,13 @@
 module Types where
 
-data Html = Html String Md
+data ADT = ADT Title Content
+  -- Your ADT **must** derive Show.
   deriving (Show, Eq)
 
-data Md = Md [Block]
-  -- Your ADT **must** derive Show.
+data Content = Content [Block]
+  deriving (Show, Eq)
+
+data Title = Title String
   deriving (Show, Eq)
 
 data Block
@@ -47,7 +50,6 @@ data CodeLine = CodeLine String
 data Line = Line [ModText]
   deriving (Show, Eq)
 
--- ask how to make this seperate types
 data ModText
   = Bold [ModText]
   | Italic [ModText]

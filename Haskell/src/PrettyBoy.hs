@@ -3,22 +3,24 @@ module PrettyBoy where
 import Control.Applicative (liftA3)
 import Data.List (intercalate)
 import Types
-  ( AltText (AltText),
+  ( ADT (..),
+    AltText (AltText),
     Block (..),
     Body (..),
     CaptionText (CaptionText),
     Cell (..),
     CodeLine (..),
+    Content (..),
     Head (..),
     HeadCell (..),
     HeadRow (..),
     ImgURL (ImgURL),
     Language (Language),
     Line (..),
-    Md (..),
     ModText (..),
     Program (Program),
     Row (..),
+    Title (..),
   )
 
 -- printing classing and typing
@@ -45,15 +47,25 @@ class PrettyBoy p where
 --   where
 --     accumulate acc text = acc ++ delim ++ prettyPrint delim text
 
-instance PrettyBoy Md where
-  preText :: String -> Md -> String
+instance PrettyBoy ADT where
+  preText :: String -> ADT -> String
+  preText delim (ADT (Title t) _) = "<!DOCTYPE html>" ++ delim ++ "<html lang=\"en\">" ++ delim ++ delim ++ "<head>" ++ delim ++ "    <meta charset=\"UTF-8\">" ++ delim ++ "    <title>" ++ t ++ "</title>" ++ delim ++ "</head>" ++ delim ++ delim
+
+  postText :: String -> ADT -> String
+  postText delim _ = delim ++ "</html>" ++ delim
+
+  unwrapPrint :: String -> ADT -> String
+  unwrapPrint d (ADT _ c) = prettyPrint d c ++ d
+
+instance PrettyBoy Content where
+  preText :: String -> Content -> String
   preText delim _ = "<body>" ++ delim ++ "    "
 
-  postText :: String -> Md -> String
+  postText :: String -> Content -> String
   postText delim _ = "</body>"
 
-  unwrapPrint :: String -> Md -> String
-  unwrapPrint d (Md a) = prettyPrintAux (d ++ "    ") a ++ d
+  unwrapPrint :: String -> Content -> String
+  unwrapPrint d (Content a) = prettyPrintAux (d ++ "    ") a ++ d
 
 instance PrettyBoy Block where
   preText :: String -> Block -> String
