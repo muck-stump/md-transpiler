@@ -37,9 +37,13 @@ jsonResponse pairs =
 -- getTime >>= (\s -> writeFile (s ++ ".html") "The content")
 
 makeTitle :: String -> IO String
-makeTitle title = do
+makeTitle t = do
   time <- getTime
-  return (title ++ "_" ++ time ++ ".html")
+  return (t ++ "_" ++ time ++ ".html")
+
+safeTitle :: String -> String
+safeTitle "" = "Test"
+safeTitle t = t
 
 main :: IO ()
 main = scotty 3000 $ do
@@ -49,15 +53,9 @@ main = scotty 3000 $ do
     let requestBodyText = decodeUtf8 requestBody
         -- Convert the Text to String
         str = lines $ unpack requestBodyText
-        -- str = unpack requestBodyText
-        save = stringToBool $ str !! 0
-        title = str !! 1
+        save = stringToBool $ head str
+        title = safeTitle $ str !! 1
         content = unlines $ drop 2 str
-        -- jObject = unwrapJSON (parse thisJson str)
-        -- content = getString $ getKey "markdown" jObject -- content of markdown file
-        -- save = getBool $ getKey "save" jObject -- whether the file should be saved
-        -- title = getString $ getKey "title" jObject
-        -- decode str into save and content
         -- markdownParser gets run with content
         -- Parse the Markdown string using 'markdownParser' and apply 'convertAllHTML'
         converted_html = getResult (parse markdownParser content) (convertADTHTML title)
