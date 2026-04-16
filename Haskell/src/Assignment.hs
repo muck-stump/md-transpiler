@@ -48,19 +48,25 @@ pBold :: Parser ModText
 pBold = makeModParser Bold pModText (string "**")
 
 pItalic :: Parser ModText
-pItalic = makeModParser Italic pModText (string "_")
+pItalic = this <|> that
+  where
+    this = makeModParser Italic pModText (string "_")
+    that = makeModParser Italic pModText (string "*")
 
 pStrikeThrough :: Parser ModText
 pStrikeThrough = makeModParser StrikeThrough pModText (string "~~")
+
+pUnderline :: Parser ModText
+pUnderline = makeModParser Underline pModText (string "__")
 
 pInlineCode :: Parser ModText
 pInlineCode = makeModParser InlineCode pBasic (string "`")
 
 pSuperScript :: Parser ModText
-pSuperScript = Super <$> (is '\\' *> pModText `pUntil` string "//")
+pSuperScript = Super <$> (string "^{" *> pModText `pUntil` string "}")
 
 pSub :: Parser ModText
-pSub = Sub <$> (string "//" *> pModText `pUntil` is '\\')
+pSub = Sub <$> (string "_{" *> pModText `pUntil` is '}')
 
 pLink :: Parser ModText
 pLink = Link <$> linkTuple
@@ -75,8 +81,12 @@ pFootnote = Footnote <$> (string "[^" *> int <* is ']')
 pUntouched :: Parser ModText
 pUntouched = Untouched <$> pBasic
 
+-- can use \ to escape sequences now, its remarkably reliable
+pEsc :: Parser ModText
+pEsc = Untouched <$> (is '\\' *> pBasic)
+
 pModText :: Parser ModText
-pModText = pBold <|> pItalic <|> pStrikeThrough <|> pSuperScript <|> pSub <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
+pModText = pEsc <|> pSuperScript <|> pSub <|> pBold <|> pUnderline <|> pItalic <|> pStrikeThrough <|> pInlineCode <|> pFootnote <|> pLink <|> pUntouched
 
 pFreeText :: Parser Block
 pFreeText = pad $ FreeText <$> some pModText
@@ -121,6 +131,16 @@ pCode = pad $ liftA2 Code language program
     program = Program <$> (char `pUntil` (newline *> string "```"))
 
 -- HEADINGS
+-- g: A -> B -> C
+--
+-- a : f A
+-- b : f B
+--
+-- g <$> a <*> b : f C
+-- a' <*> b
+-- a' : f (B -> C)
+--
+-- h <$> a <*> b <*> c
 
 pHeading :: Parser Block
 pHeading = pad $ heading <|> h1alt <|> h2alt

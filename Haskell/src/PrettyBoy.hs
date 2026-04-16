@@ -237,6 +237,7 @@ instance PrettyBoy ModText where
   preText :: String -> ModText -> String
   preText _ (Bold _) = "<strong>"
   preText _ (Italic _) = "<em>"
+  preText _ (Underline _) = "<u>"
   preText _ (StrikeThrough _) = "<del>"
   preText _ (InlineCode _) = "<code>"
   preText _ (Untouched _) = ""
@@ -248,6 +249,7 @@ instance PrettyBoy ModText where
   postText :: String -> ModText -> String
   postText _ (Bold _) = "</strong>"
   postText _ (Italic _) = "</em>"
+  postText _ (Underline _) = "</u>"
   postText _ (StrikeThrough _) = "</del>"
   postText _ (InlineCode _) = "</code>"
   postText _ (Untouched _) = ""
@@ -258,6 +260,7 @@ instance PrettyBoy ModText where
 
   unwrapPrint :: String -> ModText -> String
   unwrapPrint _ (Bold a) = prettyPrintAux "" a
+  unwrapPrint _ (Underline a) = prettyPrintAux "" a
   unwrapPrint _ (Italic a) = prettyPrintAux "" a
   unwrapPrint _ (StrikeThrough a) = prettyPrintAux "" a
   unwrapPrint _ (Super a) = prettyPrintAux "" a

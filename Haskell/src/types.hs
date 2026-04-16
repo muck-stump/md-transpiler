@@ -65,6 +65,7 @@ data ModText
   = Bold [ModText]
   | Italic [ModText]
   | StrikeThrough [ModText]
+  | Underline [ModText]
   | Super [ModText]
   | Sub [ModText]
   | InlineCode String
